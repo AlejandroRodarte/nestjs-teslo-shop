@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { env } from './config/env.config';
 import { EnvSchema } from './config/env.validation';
 import { HealthModule } from './health/health.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { HealthModule } from './health/health.module';
       synchronize: process.env.NODE_ENV !== 'production',
     }),
     HealthModule,
+    ProductsModule,
   ],
 })
 export class AppModule {}
