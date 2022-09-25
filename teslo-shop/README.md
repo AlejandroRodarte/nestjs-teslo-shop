@@ -71,3 +71,68 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+## Environment variables required to run the application
+
+### Teslo Shop application
+
+#### `NODE_ENV`
+
+- *Required*
+- Type of environment where the application is deployed
+- As of now, two values are supported: `development-docker` and `production-docker`
+
+#### `PORT`
+
+- *Optional*
+- Port where the application will reside to listen for requests
+- Defaults to `3000` if not specified
+- Change it to any port that you have available in your computer
+
+### PostgreSQL database
+
+#### `POSTGRES_USER`
+
+- *Optional*
+- Superuser username
+- Defaults to `postgres` if not specified
+- You can change it to whatever username you desire
+
+#### `POSTGRES_PASSWORD_FILE`
+
+- *Required*
+- Path (container's filesystem) to the file that contains the password for superuser `POSTGRES_USER`
+- Do not change it's original value: `/run/secrets/teslo_shop_postgres_password`
+
+#### `POSTGRES_DB`
+
+- *Required*
+- Default database name that will be used upon container creation
+- Defaults to `postgres`
+- Change it to any database name you desire
+
+## Running the application
+
+### Using `docker` and `docker-compose`
+
+#### Production
+
+1. Open the `docker-compose.yaml` file
+2. At `services.teslo-shop.image`, update tag of image `rodarte/nestjs-fr-teslo-shop-prod` to one of the available tags found at the [Docker Hub](https://hub.docker.com/repository/docker/rodarte/nestjs-fr-teslo-shop-prod) repository, or to an image tag that you built in your own computer using the `Dockerfile`
+3. At the root of this project, create a `secrets/docker/teslo-shop/postgres-password.txt` and store the sensible password of superuser `POSTGRES_USER`
+4. Run command
+
+```sh
+docker-compose up
+```
+
+#### Production
+
+1. Open the `docker-compose.dev.yaml` file
+2. At `services.teslo-shop.image`, update tag of image `rodarte/nestjs-fr-teslo-shop-dev` to one of the available tags found at the [Docker Hub](https://hub.docker.com/repository/docker/rodarte/nestjs-fr-teslo-shop-dev) repository, or to an image tag that you built in your own computer using the `Dockerfile`
+3. At the root of this project, create a `secrets/docker/teslo-shop/postgres-password.txt` and store the sensible password of superuser `POSTGRES_USER`
+4. Run command
+
+```sh
+docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up
+```
