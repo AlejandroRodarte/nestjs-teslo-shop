@@ -4,8 +4,8 @@ x-common-env-variables: &common-env-variables
   NODE_ENV: development-docker
 
 services:
-  pokedex:
-    image: rodarte/nestjs-fr-teslo-shop-dev:latest
+  teslo-shop:
+    image: rodarte/nestjs-fr-teslo-shop-dev:3a19300
     volumes:
       - ./teslo-shop:/node/app
       - /node/app/node_modules
