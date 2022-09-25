@@ -1,0 +1,13 @@
+version: '3.4'
+
+x-common-env-variables: &common-env-variables
+  NODE_ENV: production-docker
+
+services:
+  pokedex:
+    image: rodarte/nestjs-fr-teslo-shop-prod:latest
+    ports:
+      - '3000:3000'
+    environment:
+      <<: *common-env-variables
+      PORT: 3000

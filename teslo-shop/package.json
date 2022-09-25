@@ -1,8 +1,8 @@
 {
-  "name": "teslo-shop",
+  "name": "nestjs-fr-teslo-shop",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Products application based on Nest.js, made for a Udemy course made by Fernando Herrera",
+  "author": "Alejandro Rodarte Mendoza",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -23,6 +23,7 @@
   "dependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
+    "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

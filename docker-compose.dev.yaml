@@ -1,0 +1,13 @@
+version: '3.4'
+
+x-common-env-variables: &common-env-variables
+  NODE_ENV: development-docker
+
+services:
+  pokedex:
+    image: rodarte/nestjs-fr-teslo-shop-dev:latest
+    volumes:
+      - ./teslo-shop:/node/app
+      - /node/app/node_modules
+    environment:
+      <<: *common-env-variables
