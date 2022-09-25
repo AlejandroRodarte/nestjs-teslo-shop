@@ -1,7 +1,7 @@
 {
   "name": "nestjs-fr-teslo-shop",
   "version": "0.0.1",
-  "description": "Products application based on Nest.js, made for a Udemy course made by Fernando Herrera",
+  "description": "Products application based on the Nest.js framework, made for a Udemy course made by Fernando Herrera",
   "author": "Alejandro Rodarte Mendoza",
   "private": true,
   "license": "UNLICENSED",
