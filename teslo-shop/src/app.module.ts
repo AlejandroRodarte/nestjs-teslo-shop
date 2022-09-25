@@ -15,6 +15,8 @@ import { HealthModule } from './health/health.module';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.POSTGRES_URL,
+      autoLoadEntities: true,
+      synchronize: process.env.NODE_ENV !== 'production',
     }),
     HealthModule,
   ],
