@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import './lib/docker/set-secrets';
 import { AppModule } from './app.module';
 
 async function bootstrap() {

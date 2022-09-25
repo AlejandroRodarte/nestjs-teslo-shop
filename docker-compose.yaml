@@ -8,9 +8,12 @@ services:
     image: rodarte/nestjs-fr-teslo-shop-prod:3a19300
     ports:
       - '3000:3000'
+    secrets:
+      - teslo_shop_postgres_url
     environment:
       <<: *common-env-variables
       PORT: 3000
+      POSTGRES_URL_FILE: /run/secrets/teslo_shop_postgres_url
     depends_on:
       - teslo-shop-postgres
   teslo-shop-postgres:
@@ -27,5 +30,7 @@ services:
       - ./teslo-shop/postgres/prod:/var/lib/postgresql/data
 
 secrets:
+  teslo_shop_postgres_url:
+    file: ./secrets/docker/teslo-shop/postgres-url.txt
   teslo_shop_postgres_password:
-    file: ./secrets/docker/teslo-shop/postgres-password.txt
+    file: ./secrets/docker/teslo-shop-postgres/postgres-password.txt
