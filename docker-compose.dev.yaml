@@ -11,3 +11,6 @@ services:
       - /node/app/node_modules
     environment:
       <<: *common-env-variables
+  teslo-shop-postgres:
+    volumes:
+      - ./teslo-shop/postgres/dev:/var/lib/postgresql/data

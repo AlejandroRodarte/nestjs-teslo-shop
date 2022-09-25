@@ -11,3 +11,21 @@ services:
     environment:
       <<: *common-env-variables
       PORT: 3000
+    depends_on:
+      - teslo-shop-postgres
+  teslo-shop-postgres:
+    image: postgres:14.3
+    ports:
+      - '5432:5432'
+    secrets:
+      - teslo_shop_postgres_password
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/teslo_shop_postgres_password
+      POSTGRES_DB: nestjs-teslo-shop
+    volumes:
+      - ./teslo-shop/postgres/prod:/var/lib/postgresql/data
+
+secrets:
+  teslo_shop_postgres_password:
+    file: ./secrets/docker/teslo-shop/postgres-password.txt
