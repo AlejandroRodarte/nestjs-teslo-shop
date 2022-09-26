@@ -2,9 +2,15 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { saveWrapper } from 'src/lib/async-wrappers/typeorm';
+import {
+  deleteWrapper,
+  findOneWrapper,
+  findWrapper,
+  saveWrapper,
+} from 'src/lib/async-wrappers/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -34,23 +40,44 @@ export class ProductsService {
     return savedProduct;
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll(): Promise<Product[]> {
+    const [products, error] = await findWrapper({
+      repository: this.productRepository,
+    });
+    if (error) this.handleError(error);
+    return products;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string): Promise<Product> {
+    const [product, error] = await findOneWrapper({
+      repository: this.productRepository,
+      options: { where: { id } },
+    });
+    if (error) this.handleError(error);
+    if (!product)
+      throw new NotFoundException(
+        `Product with ID ${id} was not found in the database`,
+      );
+    return product;
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string): Promise<void> {
+    const [deleteResult, error] = await deleteWrapper({
+      repository: this.productRepository,
+      criteria: { id },
+    });
+    if (error) this.handleError(error);
+    if (deleteResult.affected === 0)
+      throw new NotFoundException(
+        `Product with ID ${id} was not found in the database`,
+      );
   }
 
-  private handleError(error: Error, product: Product): void {
+  private handleError(error: Error, product?: Product): void {
     if (error instanceof QueryFailedError)
       this.handleQueryFailedError(error, product);
     throw new InternalServerErrorException(
@@ -60,15 +87,15 @@ export class ProductsService {
 
   private handleQueryFailedError(
     error: QueryFailedError,
-    product: Product,
+    product?: Product,
   ): void {
-    if (error.driverError.constraint) {
+    if (product && error.driverError.constraint) {
       const constraint = error.driverError.constraint as string;
       throw new BadRequestException(
         this.getConstraintMessage(constraint, product),
       );
     }
-    throw new BadRequestException(this.getCodeMessage(error, product));
+    throw new BadRequestException(this.getCodeMessage(error));
   }
 
   private getConstraintMessage(constraint: string, product: Product): string {
@@ -86,7 +113,7 @@ export class ProductsService {
     }
   }
 
-  private getCodeMessage(error: QueryFailedError, product: Product): string {
+  private getCodeMessage(error: QueryFailedError): string {
     const code = +error.driverError.code;
     switch (code) {
       case NOT_NULL_VIOLATION: {
