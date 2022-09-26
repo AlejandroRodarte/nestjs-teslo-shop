@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { saveWrapper } from 'src/lib/async-wrappers/typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
@@ -13,13 +14,14 @@ export class ProductsService {
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    try {
-      const product = this.productRepository.create(createProductDto);
-      const savedProduct = await this.productRepository.save(product);
-      return savedProduct;
-    } catch (e) {
+    const product = this.productRepository.create(createProductDto);
+    const [savedProduct, error] = await saveWrapper({
+      repository: this.productRepository,
+      entityLike: product,
+    });
+    if (error && error instanceof QueryFailedError)
       throw new InternalServerErrorException('Ayuda!');
-    }
+    return savedProduct;
   }
 
   findAll() {
