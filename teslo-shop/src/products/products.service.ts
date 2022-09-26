@@ -11,12 +11,14 @@ import {
   findWrapper,
   saveWrapper,
 } from 'src/lib/async-wrappers/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { QueryFailedError, Repository, FindOptionsWhere } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { NOT_NULL_VIOLATION } from '../common/codes/postgresql-error.codes';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { slugRegex } from '../common/regex/slug.regex';
+import { uuidRegex } from '../common/regex/uuid.regex';
 import {
   UNIQUE_PRODUCT_TITLE_CONSTRAINT,
   UNIQUE_PRODUCT_SLUG_CONSTRAINT,
@@ -55,15 +57,29 @@ export class ProductsService {
     return products;
   }
 
-  async findOne(id: string): Promise<Product> {
+  async findOne(index: string): Promise<Product> {
+    let indexPropertyName: string;
+    const findOptionsWhere: FindOptionsWhere<Product> = {};
+
+    if (uuidRegex.test(index)) {
+      indexPropertyName = 'uuid';
+      findOptionsWhere.id = index;
+    } else if (slugRegex.test(index)) {
+      indexPropertyName = 'slug';
+      findOptionsWhere.slug = index;
+    } else {
+      indexPropertyName = 'title';
+      findOptionsWhere.title = index;
+    }
+
     const [product, error] = await findOneWrapper({
       repository: this.productRepository,
-      options: { where: { id } },
+      options: { where: findOptionsWhere },
     });
     if (error) this.handleError(error);
     if (!product)
       throw new NotFoundException(
-        `Product with ID ${id} was not found in the database`,
+        `Product with ${indexPropertyName} ${index} was not found in the database`,
       );
     return product;
   }

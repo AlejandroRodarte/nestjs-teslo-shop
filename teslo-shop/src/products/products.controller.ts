@@ -32,9 +32,9 @@ export class ProductsController {
     return this.productsService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Product> {
-    return this.productsService.findOne(id);
+  @Get(':index')
+  findOne(@Param('index') index: string): Promise<Product> {
+    return this.productsService.findOne(index);
   }
 
   @Patch(':id')

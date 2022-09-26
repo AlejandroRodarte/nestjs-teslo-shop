@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { ProductGender } from 'src/common/enums/product-gender.enum';
 import { ProductSize } from 'src/common/enums/product-size.enum';
+import { slugRegex } from 'src/common/regex/slug.regex';
 
 export class CreateProductDto {
   @IsString()
@@ -29,7 +30,7 @@ export class CreateProductDto {
 
   @IsString()
   @IsOptional()
-  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  @Matches(slugRegex)
   public slug?: string;
 
   @IsInt()

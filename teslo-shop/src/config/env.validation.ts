@@ -1,13 +1,11 @@
 import * as Joi from 'joi';
+import { postgresUriRegex } from '../common/regex/postgres-uri.regex';
 
 interface IEnvSchema {
   NODE_ENV: Joi.StringSchema;
   PORT: Joi.NumberSchema;
   POSTGRES_URL: Joi.StringSchema;
 }
-
-const postgresUriRegex =
-  /^(?:postgres:\/{2})?(?:([^@\/?#\s]+)@)?([^\/?#\s]+)?(?:\/([^?#\s]*))?(?:[?]([^#\s]+))?\S*$/;
 
 const nodeEnvSchema = Joi.string()
   .required()
