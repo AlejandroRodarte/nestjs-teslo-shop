@@ -1,0 +1,1 @@
+export const NOT_NULL_VIOLATION = 23502;

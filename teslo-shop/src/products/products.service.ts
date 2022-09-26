@@ -9,6 +9,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
+import { NOT_NULL_VIOLATION } from '../common/codes/postgresql-error.codes';
 import {
   UNIQUE_PRODUCT_TITLE_CONSTRAINT,
   UNIQUE_PRODUCT_SLUG_CONSTRAINT,
@@ -61,10 +62,13 @@ export class ProductsService {
     error: QueryFailedError,
     product: Product,
   ): void {
-    const constraint = error.driverError.constraint as string;
-    throw new BadRequestException(
-      this.getConstraintMessage(constraint, product),
-    );
+    if (error.driverError.constraint) {
+      const constraint = error.driverError.constraint as string;
+      throw new BadRequestException(
+        this.getConstraintMessage(constraint, product),
+      );
+    }
+    throw new BadRequestException(this.getCodeMessage(error, product));
   }
 
   private getConstraintMessage(constraint: string, product: Product): string {
@@ -79,6 +83,18 @@ export class ProductsService {
         return 'Product stock should be greater or equal than 0';
       default:
         return 'Unhandled constraint type. Create a custom message!';
+    }
+  }
+
+  private getCodeMessage(error: QueryFailedError, product: Product): string {
+    const code = +error.driverError.code;
+    switch (code) {
+      case NOT_NULL_VIOLATION: {
+        const column = error.driverError.column as string;
+        return `Field '${column}' must not be null`;
+      }
+      default:
+        return 'Unhandled PostgreSQL code. Create a custom message!';
     }
   }
 }

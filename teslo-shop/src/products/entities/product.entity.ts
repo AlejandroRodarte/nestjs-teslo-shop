@@ -1,4 +1,11 @@
-import { Check, Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  BeforeInsert,
+  Check,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { ProductSize } from '../../common/enums/product-size.enum';
 import { ProductGender } from '../../common/enums/product-gender.enum';
 import { PRODUCT_GENDER_ENUM, PRODUCT_SIZE_ENUM } from './product.enum-names';
@@ -50,4 +57,12 @@ export class Product {
     enumName: PRODUCT_GENDER_ENUM,
   })
   public gender: ProductGender;
+
+  @BeforeInsert()
+  setSlug(): void {
+    if (!this.slug)
+      this.slug = this.title.toLowerCase().replace(/ /g, '-').replace(/'/g, '');
+    else
+      this.slug = this.slug.toLowerCase().replace(/ /g, '-').replace(/'/g, '');
+  }
 }
