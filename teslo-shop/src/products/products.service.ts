@@ -16,6 +16,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { NOT_NULL_VIOLATION } from '../common/codes/postgresql-error.codes';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import {
   UNIQUE_PRODUCT_TITLE_CONSTRAINT,
   UNIQUE_PRODUCT_SLUG_CONSTRAINT,
@@ -40,9 +41,15 @@ export class ProductsService {
     return savedProduct;
   }
 
-  async findAll(): Promise<Product[]> {
+  async findAll(paginationDto: PaginationDto): Promise<Product[]> {
+    const { limit = 10, offset = 0 } = paginationDto;
+
     const [products, error] = await findWrapper({
       repository: this.productRepository,
+      options: {
+        take: limit,
+        skip: offset,
+      },
     });
     if (error) this.handleError(error);
     return products;
