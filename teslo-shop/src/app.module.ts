@@ -5,6 +5,7 @@ import { env } from './config/env.config';
 import { EnvSchema } from './config/env.validation';
 import { HealthModule } from './health/health.module';
 import { ProductsModule } from './products/products.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProductsModule } from './products/products.module';
     }),
     HealthModule,
     ProductsModule,
+    CommonModule,
   ],
 })
 export class AppModule {}
