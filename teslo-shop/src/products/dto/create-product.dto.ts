@@ -7,6 +7,7 @@ import {
   IsPositive,
   IsString,
   Matches,
+  Min,
   MinLength,
 } from 'class-validator';
 import { ProductGender } from 'src/common/enums/product-gender.enum';
@@ -18,7 +19,7 @@ export class CreateProductDto {
   public title: string;
 
   @IsNumber()
-  @IsPositive()
+  @Min(0.01)
   @IsOptional()
   public price?: number;
 
