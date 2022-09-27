@@ -81,6 +81,84 @@ export class ProductsService {
   }
 
   async findOne(index: string): Promise<FindOneProductResponseDto> {
+    const product = await this._findOneProductEntity(index);
+    return FlattenedImagesProductResponseDto.buildFromProductEntity(product);
+  }
+
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+  ): Promise<UpdateProductResponseDto> {
+    const { images, ...primitiveProductUpdates } = updateProductDto;
+
+    const productUpdates: DeepPartial<Product> = {
+      id,
+      ...primitiveProductUpdates,
+    };
+
+    const [productWithUpdates, preloadError] = await asyncWrapper(async () => {
+      const product = await this.productRepository.preload(productUpdates);
+      return product;
+    });
+    if (preloadError) this.handleError(preloadError);
+    if (!productWithUpdates)
+      throw new NotFoundException(
+        `Product with ID ${id} was not found in the database`,
+      );
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    const transaction = async () => {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      if (images) {
+        await queryRunner.manager.delete(ProductImage, { product: { id } });
+        productWithUpdates.images = images.map((image) =>
+          this.productImageRepository.create({ url: image }),
+        );
+      }
+
+      await queryRunner.manager.save(productWithUpdates);
+      await queryRunner.commitTransaction();
+
+      const updatedProduct = await this._findOneProductEntity(id);
+      return updatedProduct;
+    };
+
+    const rollback = async () => {
+      await queryRunner.rollbackTransaction();
+    };
+
+    const close = async () => {
+      await queryRunner.release();
+    };
+
+    const [updatedProduct, error] = await asyncWrapper(
+      transaction,
+      rollback,
+      close,
+    );
+    if (error) this.handleError(error, productWithUpdates);
+
+    return FlattenedImagesProductResponseDto.buildFromProductEntity(
+      updatedProduct,
+    );
+  }
+
+  async remove(id: string): Promise<void> {
+    const [deleteResult, error] = await asyncWrapper(async () => {
+      const deleteResult = await this.productRepository.delete({ id });
+      return deleteResult;
+    });
+    if (error) this.handleError(error);
+    if (deleteResult.affected === 0)
+      throw new NotFoundException(
+        `Product with ID ${id} was not found in the database`,
+      );
+  }
+
+  private async _findOneProductEntity(index: string): Promise<Product> {
     let indexPropertyName: string;
     const productsQueryBuilder = this.productRepository.createQueryBuilder('p');
 
@@ -111,67 +189,7 @@ export class ProductsService {
       throw new NotFoundException(
         `Product with ${indexPropertyName} ${index} was not found in the database`,
       );
-    return FlattenedImagesProductResponseDto.buildFromProductEntity(product);
-  }
-
-  async update(
-    id: string,
-    updateProductDto: UpdateProductDto,
-  ): Promise<UpdateProductResponseDto> {
-    const { images, ...primitiveProductUpdates } = updateProductDto;
-
-    const productUpdates: DeepPartial<Product> = {
-      id,
-      ...primitiveProductUpdates,
-    };
-
-    const [productWithUpdates, preloadError] = await asyncWrapper(async () => {
-      const product = await this.productRepository.preload(productUpdates);
-      return product;
-    });
-    if (preloadError) this.handleError(preloadError);
-    if (!productWithUpdates)
-      throw new NotFoundException(
-        `Product with ID ${id} was not found in the database`,
-      );
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    if (images) {
-      await queryRunner.manager.delete(ProductImage, { product: { id } });
-      productWithUpdates.images = images.map((image) =>
-        this.productImageRepository.create({ url: image }),
-      );
-    } else {
-    }
-
-    await queryRunner.manager.save(productWithUpdates);
-    await queryRunner.commitTransaction();
-    await queryRunner.release();
-
-    const [updatedProduct, saveError] = await asyncWrapper(async () => {
-      const product = await this.productRepository.save(productWithUpdates);
-      return product;
-    });
-    if (saveError) this.handleError(saveError, productWithUpdates);
-
-    return FlattenedImagesProductResponseDto.buildFromProductEntity(
-      updatedProduct,
-    );
-  }
-
-  async remove(id: string): Promise<void> {
-    const [deleteResult, error] = await asyncWrapper(async () => {
-      const deleteResult = await this.productRepository.delete({ id });
-      return deleteResult;
-    });
-    if (error) this.handleError(error);
-    if (deleteResult.affected === 0)
-      throw new NotFoundException(
-        `Product with ID ${id} was not found in the database`,
-      );
+    return product;
   }
 
   private handleError(error: Error, product?: Product): void {
