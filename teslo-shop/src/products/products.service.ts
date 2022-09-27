@@ -7,10 +7,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as repositoryWrappers from 'src/lib/async-wrappers/typeorm/repository';
 import * as queryBuilderWrappers from 'src/lib/async-wrappers/typeorm/query-builder';
-import { QueryFailedError, Repository } from 'typeorm';
+import { DeepPartial, QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
+import { Product, ProductImage } from './entities';
 import { NOT_NULL_VIOLATION } from '../common/codes/postgresql-error.codes';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { slugRegex } from '../common/regex/slug.regex';
@@ -27,10 +27,21 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const product = this.productRepository.create(createProductDto);
+    const { images = [], ...primitiveProductData } = createProductDto;
+
+    const productAttributes: DeepPartial<Product> = {
+      ...primitiveProductData,
+      images: images.map((image) =>
+        this.productImageRepository.create({ url: image }),
+      ),
+    };
+
+    const product = this.productRepository.create(productAttributes);
     const [savedProduct, error] = await repositoryWrappers.saveWrapper({
       repository: this.productRepository,
       entityLike: product,
@@ -86,9 +97,10 @@ export class ProductsService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
-    const productUpdates = {
+    const productUpdates: DeepPartial<Product> = {
       id,
       ...updateProductDto,
+      images: [],
     };
 
     const [productWithUpdates, preloadError] =
