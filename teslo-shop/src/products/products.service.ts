@@ -53,7 +53,7 @@ export class ProductsService {
       const newProduct = await this.productRepository.save(product);
       return newProduct;
     });
-    if (error) this.handleError(error, product);
+    if (error) this._handleError(error, product);
     return FlattenedImagesProductResponseDto.buildFromProductEntity(
       savedProduct,
     );
@@ -74,7 +74,7 @@ export class ProductsService {
       });
       return foundProducts;
     });
-    if (error) this.handleError(error);
+    if (error) this._handleError(error);
     return FlattenedImagesProductResponseDto.buildFromProductEntityArray(
       products,
     );
@@ -100,7 +100,7 @@ export class ProductsService {
       const product = await this.productRepository.preload(productUpdates);
       return product;
     });
-    if (preloadError) this.handleError(preloadError);
+    if (preloadError) this._handleError(preloadError);
     if (!productWithUpdates)
       throw new NotFoundException(
         `Product with ID ${id} was not found in the database`,
@@ -139,7 +139,7 @@ export class ProductsService {
       rollback,
       close,
     );
-    if (error) this.handleError(error, productWithUpdates);
+    if (error) this._handleError(error, productWithUpdates);
 
     return FlattenedImagesProductResponseDto.buildFromProductEntity(
       updatedProduct,
@@ -151,7 +151,7 @@ export class ProductsService {
       const deleteResult = await this.productRepository.delete({ id });
       return deleteResult;
     });
-    if (error) this.handleError(error);
+    if (error) this._handleError(error);
     if (deleteResult.affected === 0)
       throw new NotFoundException(
         `Product with ID ${id} was not found in the database`,
@@ -184,7 +184,7 @@ export class ProductsService {
       return foundProduct;
     });
 
-    if (error) this.handleError(error);
+    if (error) this._handleError(error);
     if (!product)
       throw new NotFoundException(
         `Product with ${indexPropertyName} ${index} was not found in the database`,
@@ -192,28 +192,28 @@ export class ProductsService {
     return product;
   }
 
-  private handleError(error: Error, product?: Product): void {
+  private _handleError(error: Error, product?: Product): void {
     if (error instanceof QueryFailedError)
-      this.handleQueryFailedError(error, product);
+      this._handleQueryFailedError(error, product);
     throw new InternalServerErrorException(
       'An error that is not of type QueryFailedError was thrown. Create a custom handler!',
     );
   }
 
-  private handleQueryFailedError(
+  private _handleQueryFailedError(
     error: QueryFailedError,
     product?: Product,
   ): void {
     if (product && error.driverError.constraint) {
       const constraint = error.driverError.constraint as string;
       throw new BadRequestException(
-        this.getConstraintMessage(constraint, product),
+        this._getConstraintMessage(constraint, product),
       );
     }
-    throw new BadRequestException(this.getCodeMessage(error));
+    throw new BadRequestException(this._getCodeMessage(error));
   }
 
-  private getConstraintMessage(constraint: string, product: Product): string {
+  private _getConstraintMessage(constraint: string, product: Product): string {
     switch (constraint) {
       case UNIQUE_PRODUCT_TITLE_CONSTRAINT:
         return `There is already a product named '${product.title}' in the database`;
@@ -228,7 +228,7 @@ export class ProductsService {
     }
   }
 
-  private getCodeMessage(error: QueryFailedError): string {
+  private _getCodeMessage(error: QueryFailedError): string {
     const code = +error.driverError.code;
     switch (code) {
       case NOT_NULL_VIOLATION: {
