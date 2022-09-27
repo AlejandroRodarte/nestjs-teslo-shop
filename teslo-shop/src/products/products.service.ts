@@ -5,8 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as repositoryWrappers from 'src/lib/async-wrappers/typeorm/repository';
-import * as queryBuilderWrappers from 'src/lib/async-wrappers/typeorm/query-builder';
 import { DataSource, DeepPartial, QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/requests/create-product.dto';
 import { UpdateProductDto } from './dto/requests/update-product.dto';
@@ -26,6 +24,7 @@ import { FindAllProductsResponseDto } from './dto/responses/find-all-products-re
 import { FlattenedImagesProductResponseDto } from './dto/responses/objects/product/flattened-images-product-response.dto';
 import { FindOneProductResponseDto } from './dto/responses/find-one-product-response.dto';
 import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
+import { asyncWrapper } from '../lib/wrappers/async-wrapper';
 
 @Injectable()
 export class ProductsService {
@@ -50,9 +49,9 @@ export class ProductsService {
     };
 
     const product = this.productRepository.create(productAttributes);
-    const [savedProduct, error] = await repositoryWrappers.saveWrapper({
-      repository: this.productRepository,
-      entityLike: product,
+    const [savedProduct, error] = await asyncWrapper(async () => {
+      const newProduct = await this.productRepository.save(product);
+      return newProduct;
     });
     if (error) this.handleError(error, product);
     return FlattenedImagesProductResponseDto.buildFromProductEntity(
@@ -65,15 +64,15 @@ export class ProductsService {
   ): Promise<FindAllProductsResponseDto> {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    const [products, error] = await repositoryWrappers.findWrapper({
-      repository: this.productRepository,
-      options: {
+    const [products, error] = await asyncWrapper(async () => {
+      const foundProducts = await this.productRepository.find({
         take: limit,
         skip: offset,
         relations: {
           images: true,
         },
-      },
+      });
+      return foundProducts;
     });
     if (error) this.handleError(error);
     return FlattenedImagesProductResponseDto.buildFromProductEntityArray(
@@ -102,8 +101,9 @@ export class ProductsService {
 
     productsQueryBuilder.leftJoinAndSelect('p.images', 'p_images');
 
-    const [product, error] = await queryBuilderWrappers.getOneWrapper({
-      selectQueryBuilder: productsQueryBuilder,
+    const [product, error] = await asyncWrapper(async () => {
+      const foundProduct = await productsQueryBuilder.getOne();
+      return foundProduct;
     });
 
     if (error) this.handleError(error);
@@ -125,11 +125,10 @@ export class ProductsService {
       ...primitiveProductUpdates,
     };
 
-    const [productWithUpdates, preloadError] =
-      await repositoryWrappers.preloadWrapper<Product>({
-        repository: this.productRepository,
-        entityLike: productUpdates,
-      });
+    const [productWithUpdates, preloadError] = await asyncWrapper(async () => {
+      const product = await this.productRepository.preload(productUpdates);
+      return product;
+    });
     if (preloadError) this.handleError(preloadError);
     if (!productWithUpdates)
       throw new NotFoundException(
@@ -137,10 +136,24 @@ export class ProductsService {
       );
 
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const [updatedProduct, saveError] = await repositoryWrappers.saveWrapper({
-      repository: this.productRepository,
-      entityLike: productWithUpdates,
+    if (images) {
+      await queryRunner.manager.delete(ProductImage, { product: { id } });
+      productWithUpdates.images = images.map((image) =>
+        this.productImageRepository.create({ url: image }),
+      );
+    } else {
+    }
+
+    await queryRunner.manager.save(productWithUpdates);
+    await queryRunner.commitTransaction();
+    await queryRunner.release();
+
+    const [updatedProduct, saveError] = await asyncWrapper(async () => {
+      const product = await this.productRepository.save(productWithUpdates);
+      return product;
     });
     if (saveError) this.handleError(saveError, productWithUpdates);
 
@@ -150,9 +163,9 @@ export class ProductsService {
   }
 
   async remove(id: string): Promise<void> {
-    const [deleteResult, error] = await repositoryWrappers.deleteWrapper({
-      repository: this.productRepository,
-      criteria: { id },
+    const [deleteResult, error] = await asyncWrapper(async () => {
+      const deleteResult = await this.productRepository.delete({ id });
+      return deleteResult;
     });
     if (error) this.handleError(error);
     if (deleteResult.affected === 0)
