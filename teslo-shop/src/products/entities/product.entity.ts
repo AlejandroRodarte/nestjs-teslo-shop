@@ -1,5 +1,6 @@
 import {
   BeforeInsert,
+  BeforeUpdate,
   Check,
   Column,
   Entity,
@@ -64,5 +65,10 @@ export class Product {
       this.slug = this.title.toLowerCase().replace(/ /g, '-').replace(/'/g, '');
     else
       this.slug = this.slug.toLowerCase().replace(/ /g, '-').replace(/'/g, '');
+  }
+
+  @BeforeUpdate()
+  updateSlug(): void {
+    this.slug = this.slug.toLowerCase().replace(/ /g, '-').replace(/'/g, '');
   }
 }
