@@ -4,6 +4,7 @@ import {
   Check,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -17,6 +18,7 @@ import {
   POSITIVE_OR_ZERO_PRODUCT_STOCK_CONSTRAINT,
   PRIMARY_KEY_PRODUCT_ID,
 } from './product.constraint-names';
+import { ProductImage } from './product-image.entity';
 
 @Entity()
 @Unique(UNIQUE_PRODUCT_TITLE_CONSTRAINT, ['title'])
@@ -65,6 +67,11 @@ export class Product {
     default: [],
   })
   tags: string[];
+
+  @OneToMany(() => ProductImage, (productImage) => productImage.product, {
+    cascade: true,
+  })
+  images?: ProductImage[];
 
   @BeforeInsert()
   setSlug(): void {
