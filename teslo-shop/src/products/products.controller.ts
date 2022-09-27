@@ -12,10 +12,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
+import { CreateProductDto } from './dto/requests/create-product.dto';
+import { UpdateProductDto } from './dto/requests/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { FindAllProductsResponseDto } from './dto/responses/find-all-products-response.dto';
+import { CreateProductResponseDto } from './dto/responses/create-product-response.dto';
+import { FindOneProductResponseDto } from './dto/responses/find-one-product-response.dto';
+import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -23,17 +26,21 @@ export class ProductsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createProductDto: CreateProductDto): Promise<Product> {
+  create(
+    @Body() createProductDto: CreateProductDto,
+  ): Promise<CreateProductResponseDto> {
     return this.productsService.create(createProductDto);
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto): Promise<Product[]> {
+  findAll(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<FindAllProductsResponseDto> {
     return this.productsService.findAll(paginationDto);
   }
 
   @Get(':index')
-  findOne(@Param('index') index: string): Promise<Product> {
+  findOne(@Param('index') index: string): Promise<FindOneProductResponseDto> {
     return this.productsService.findOne(index);
   }
 
@@ -41,7 +48,7 @@ export class ProductsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
-  ): Promise<Product> {
+  ): Promise<UpdateProductResponseDto> {
     return this.productsService.update(id, updateProductDto);
   }
 

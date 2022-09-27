@@ -19,6 +19,7 @@ import { CommonModule } from './common/common.module';
       url: process.env.POSTGRES_URL,
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV !== 'production',
+      logging: process.env.NODE_ENV !== 'production',
     }),
     HealthModule,
     ProductsModule,

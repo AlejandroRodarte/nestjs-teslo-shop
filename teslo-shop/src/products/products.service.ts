@@ -8,19 +8,24 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as repositoryWrappers from 'src/lib/async-wrappers/typeorm/repository';
 import * as queryBuilderWrappers from 'src/lib/async-wrappers/typeorm/query-builder';
 import { DeepPartial, QueryFailedError, Repository } from 'typeorm';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from './dto/requests/create-product.dto';
+import { UpdateProductDto } from './dto/requests/update-product.dto';
 import { Product, ProductImage } from './entities';
 import { NOT_NULL_VIOLATION } from '../common/codes/postgresql-error.codes';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { slugRegex } from '../common/regex/slug.regex';
 import { uuidRegex } from '../common/regex/uuid.regex';
+import { CreateProductResponseDto } from './dto/responses/create-product-response.dto';
 import {
   UNIQUE_PRODUCT_TITLE_CONSTRAINT,
   UNIQUE_PRODUCT_SLUG_CONSTRAINT,
   POSITIVE_PRODUCT_PRICE_CONSTRAINT,
   POSITIVE_OR_ZERO_PRODUCT_STOCK_CONSTRAINT,
 } from './entities/product.constraint-names';
+import { FindAllProductsResponseDto } from './dto/responses/find-all-products-response.dto';
+import { FlattenedImagesProductResponseDto } from './dto/responses/objects/product/flattened-images-product-response.dto';
+import { FindOneProductResponseDto } from './dto/responses/find-one-product-response.dto';
+import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
 
 @Injectable()
 export class ProductsService {
@@ -31,7 +36,9 @@ export class ProductsService {
     private readonly productImageRepository: Repository<ProductImage>,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
+  async create(
+    createProductDto: CreateProductDto,
+  ): Promise<CreateProductResponseDto> {
     const { images = [], ...primitiveProductData } = createProductDto;
 
     const productAttributes: DeepPartial<Product> = {
@@ -47,10 +54,14 @@ export class ProductsService {
       entityLike: product,
     });
     if (error) this.handleError(error, product);
-    return savedProduct;
+    return FlattenedImagesProductResponseDto.buildFromProductEntity(
+      savedProduct,
+    );
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<Product[]> {
+  async findAll(
+    paginationDto: PaginationDto,
+  ): Promise<FindAllProductsResponseDto> {
     const { limit = 10, offset = 0 } = paginationDto;
 
     const [products, error] = await repositoryWrappers.findWrapper({
@@ -58,28 +69,37 @@ export class ProductsService {
       options: {
         take: limit,
         skip: offset,
+        relations: {
+          images: true,
+        },
       },
     });
     if (error) this.handleError(error);
-    return products;
+    return FlattenedImagesProductResponseDto.buildFromProductEntityArray(
+      products,
+    );
   }
 
-  async findOne(index: string): Promise<Product> {
+  async findOne(index: string): Promise<FindOneProductResponseDto> {
     let indexPropertyName: string;
-    const productsQueryBuilder = this.productRepository.createQueryBuilder();
+    const productsQueryBuilder = this.productRepository.createQueryBuilder('p');
 
     if (uuidRegex.test(index)) {
       indexPropertyName = 'uuid';
-      productsQueryBuilder.where('id = :id', { id: index });
+      productsQueryBuilder.where('p.id = :id', { id: index });
     } else if (slugRegex.test(index)) {
       indexPropertyName = 'slug';
-      productsQueryBuilder.where('slug = :slug', { slug: index.toLowerCase() });
+      productsQueryBuilder.where('p.slug = :slug', {
+        slug: index.toLowerCase(),
+      });
     } else {
       indexPropertyName = 'title';
-      productsQueryBuilder.where('LOWER(title) = :title', {
+      productsQueryBuilder.where('LOWER(p.title) = :title', {
         title: index.toLowerCase(),
       });
     }
+
+    productsQueryBuilder.leftJoinAndSelect('p.images', 'p_images');
 
     const [product, error] = await queryBuilderWrappers.getOneWrapper({
       selectQueryBuilder: productsQueryBuilder,
@@ -90,13 +110,13 @@ export class ProductsService {
       throw new NotFoundException(
         `Product with ${indexPropertyName} ${index} was not found in the database`,
       );
-    return product;
+    return FlattenedImagesProductResponseDto.buildFromProductEntity(product);
   }
 
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-  ): Promise<Product> {
+  ): Promise<UpdateProductResponseDto> {
     const productUpdates: DeepPartial<Product> = {
       id,
       ...updateProductDto,
@@ -120,7 +140,9 @@ export class ProductsService {
     });
     if (saveError) this.handleError(saveError, productWithUpdates);
 
-    return updatedProduct;
+    return FlattenedImagesProductResponseDto.buildFromProductEntity(
+      updatedProduct,
+    );
   }
 
   async remove(id: string): Promise<void> {
