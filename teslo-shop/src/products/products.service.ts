@@ -82,8 +82,33 @@ export class ProductsService {
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
+    const productUpdates = {
+      id,
+      ...updateProductDto,
+    };
+
+    const [productWithUpdates, preloadError] =
+      await repositoryWrappers.preloadWrapper<Product>({
+        repository: this.productRepository,
+        entityLike: productUpdates,
+      });
+    if (preloadError) this.handleError(preloadError);
+    if (!productWithUpdates)
+      throw new NotFoundException(
+        `Product with ID ${id} was not found in the database`,
+      );
+
+    const [updatedProduct, saveError] = await repositoryWrappers.saveWrapper({
+      repository: this.productRepository,
+      entityLike: productWithUpdates,
+    });
+    if (saveError) this.handleError(saveError, productWithUpdates);
+
+    return updatedProduct;
   }
 
   async remove(id: string): Promise<void> {
