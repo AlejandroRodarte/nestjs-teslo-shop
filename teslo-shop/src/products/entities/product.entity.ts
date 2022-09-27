@@ -59,6 +59,13 @@ export class Product {
   })
   public gender: ProductGender;
 
+  @Column({
+    type: 'text',
+    array: true,
+    default: [],
+  })
+  tags: string[];
+
   @BeforeInsert()
   setSlug(): void {
     if (!this.slug)
