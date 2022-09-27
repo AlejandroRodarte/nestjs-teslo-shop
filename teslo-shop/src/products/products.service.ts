@@ -7,11 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   deleteWrapper,
-  findOneWrapper,
   findWrapper,
+  getOneWrapper,
   saveWrapper,
 } from 'src/lib/async-wrappers/typeorm';
-import { QueryFailedError, Repository, FindOptionsWhere } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
@@ -59,23 +59,25 @@ export class ProductsService {
 
   async findOne(index: string): Promise<Product> {
     let indexPropertyName: string;
-    const findOptionsWhere: FindOptionsWhere<Product> = {};
+    const productsQueryBuilder = this.productRepository.createQueryBuilder();
 
     if (uuidRegex.test(index)) {
       indexPropertyName = 'uuid';
-      findOptionsWhere.id = index;
+      productsQueryBuilder.where('id = :id', { id: index });
     } else if (slugRegex.test(index)) {
       indexPropertyName = 'slug';
-      findOptionsWhere.slug = index;
+      productsQueryBuilder.where('slug = :slug', { slug: index.toLowerCase() });
     } else {
       indexPropertyName = 'title';
-      findOptionsWhere.title = index;
+      productsQueryBuilder.where('LOWER(title) = :title', {
+        title: index.toLowerCase(),
+      });
     }
 
-    const [product, error] = await findOneWrapper({
-      repository: this.productRepository,
-      options: { where: findOptionsWhere },
+    const [product, error] = await getOneWrapper({
+      selectQueryBuilder: productsQueryBuilder,
     });
+
     if (error) this.handleError(error);
     if (!product)
       throw new NotFoundException(
