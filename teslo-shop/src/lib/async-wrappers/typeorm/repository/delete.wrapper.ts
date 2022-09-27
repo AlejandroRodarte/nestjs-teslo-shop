@@ -1,6 +1,6 @@
-import { DeleteArgs } from 'src/lib/interfaces/async-wrappers/typeorm/delete.interface';
+import { DeleteArgs } from 'src/lib/interfaces/async-wrappers/typeorm/repository/delete.interface';
 import { DeleteResult } from 'typeorm';
-import { AsyncTuple } from '../../types/async-tuple.type';
+import { AsyncTuple } from '../../../types/async-tuple.type';
 
 export async function deleteWrapper<EntityType>(
   args: DeleteArgs<EntityType>,

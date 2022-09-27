@@ -5,12 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  deleteWrapper,
-  findWrapper,
-  getOneWrapper,
-  saveWrapper,
-} from 'src/lib/async-wrappers/typeorm';
+import * as repositoryWrappers from 'src/lib/async-wrappers/typeorm/repository';
+import * as queryBuilderWrappers from 'src/lib/async-wrappers/typeorm/query-builder';
 import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -35,7 +31,7 @@ export class ProductsService {
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
     const product = this.productRepository.create(createProductDto);
-    const [savedProduct, error] = await saveWrapper({
+    const [savedProduct, error] = await repositoryWrappers.saveWrapper({
       repository: this.productRepository,
       entityLike: product,
     });
@@ -46,7 +42,7 @@ export class ProductsService {
   async findAll(paginationDto: PaginationDto): Promise<Product[]> {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    const [products, error] = await findWrapper({
+    const [products, error] = await repositoryWrappers.findWrapper({
       repository: this.productRepository,
       options: {
         take: limit,
@@ -74,7 +70,7 @@ export class ProductsService {
       });
     }
 
-    const [product, error] = await getOneWrapper({
+    const [product, error] = await queryBuilderWrappers.getOneWrapper({
       selectQueryBuilder: productsQueryBuilder,
     });
 
@@ -91,7 +87,7 @@ export class ProductsService {
   }
 
   async remove(id: string): Promise<void> {
-    const [deleteResult, error] = await deleteWrapper({
+    const [deleteResult, error] = await repositoryWrappers.deleteWrapper({
       repository: this.productRepository,
       criteria: { id },
     });

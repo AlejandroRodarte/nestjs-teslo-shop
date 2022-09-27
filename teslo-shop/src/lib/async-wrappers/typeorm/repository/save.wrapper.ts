@@ -1,5 +1,5 @@
-import { SaveArgs } from 'src/lib/interfaces/async-wrappers/typeorm/save-args.interface';
-import { AsyncTuple } from '../../types/async-tuple.type';
+import { SaveArgs } from 'src/lib/interfaces/async-wrappers/typeorm/repository/save-args.interface';
+import { AsyncTuple } from '../../../types/async-tuple.type';
 
 export async function saveWrapper<EntityType>(
   args: SaveArgs<EntityType>,

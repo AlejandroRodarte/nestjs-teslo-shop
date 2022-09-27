@@ -1,5 +1,5 @@
-import { GetOneArgs } from 'src/lib/interfaces/async-wrappers/typeorm/get-one.interface';
-import { AsyncTuple } from '../../types/async-tuple.type';
+import { GetOneArgs } from 'src/lib/interfaces/async-wrappers/typeorm/query-builder/get-one.interface';
+import { AsyncTuple } from '../../../types/async-tuple.type';
 
 export async function getOneWrapper<EntityType>(
   args: GetOneArgs<EntityType>,

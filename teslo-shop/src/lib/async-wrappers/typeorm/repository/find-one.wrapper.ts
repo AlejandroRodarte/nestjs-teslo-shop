@@ -1,5 +1,5 @@
-import { FindOneArgs } from 'src/lib/interfaces/async-wrappers/typeorm/find-one.interface';
-import { AsyncTuple } from '../../types/async-tuple.type';
+import { FindOneArgs } from 'src/lib/interfaces/async-wrappers/typeorm/repository/find-one.interface';
+import { AsyncTuple } from '../../../types/async-tuple.type';
 
 export async function findOneWrapper<EntityType>(
   args: FindOneArgs<EntityType>,
