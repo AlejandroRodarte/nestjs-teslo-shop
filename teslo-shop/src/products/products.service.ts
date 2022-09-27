@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as repositoryWrappers from 'src/lib/async-wrappers/typeorm/repository';
 import * as queryBuilderWrappers from 'src/lib/async-wrappers/typeorm/query-builder';
-import { DeepPartial, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, DeepPartial, QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/requests/create-product.dto';
 import { UpdateProductDto } from './dto/requests/update-product.dto';
 import { Product, ProductImage } from './entities';
@@ -34,6 +34,7 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(ProductImage)
     private readonly productImageRepository: Repository<ProductImage>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(
@@ -117,10 +118,11 @@ export class ProductsService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<UpdateProductResponseDto> {
+    const { images, ...primitiveProductUpdates } = updateProductDto;
+
     const productUpdates: DeepPartial<Product> = {
       id,
-      ...updateProductDto,
-      images: [],
+      ...primitiveProductUpdates,
     };
 
     const [productWithUpdates, preloadError] =
@@ -133,6 +135,8 @@ export class ProductsService {
       throw new NotFoundException(
         `Product with ID ${id} was not found in the database`,
       );
+
+    const queryRunner = this.dataSource.createQueryRunner();
 
     const [updatedProduct, saveError] = await repositoryWrappers.saveWrapper({
       repository: this.productRepository,
