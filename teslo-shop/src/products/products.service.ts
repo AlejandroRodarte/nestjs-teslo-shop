@@ -239,4 +239,12 @@ export class ProductsService {
         return 'Unhandled PostgreSQL code. Create a custom message!';
     }
   }
+
+  public async deleteAllProducts(): Promise<void> {
+    const [, error] = await asyncWrapper(async () => {
+      const deleteResult = await this.productRepository.delete({});
+      return deleteResult;
+    });
+    if (error) this._handleError(error);
+  }
 }
