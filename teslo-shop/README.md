@@ -166,3 +166,10 @@ postgres://<username>:<password>@<domain>:<port>/<database-name>
 ```sh
 docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up
 ```
+
+## Seeding the database
+
+1. Ensure that the *Nest.js* application and *PostgreSQL* database is running
+2. Hit endpoint `GET /seed` to populate the data
+
+> **Beware:** This endpoint deletes ALL products and product images in the database
