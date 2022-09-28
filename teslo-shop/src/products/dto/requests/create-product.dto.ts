@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { ProductGender } from 'src/common/enums/product-gender.enum';
 import { ProductSize } from 'src/common/enums/product-size.enum';
+import { ProductType } from 'src/common/enums/product-type.enum';
 import { imageUrlRegex } from 'src/common/regex/image-url.regex';
 import { slugRegex } from 'src/common/regex/slug.regex';
 
@@ -59,4 +60,8 @@ export class CreateProductDto {
   @Matches(imageUrlRegex, { each: true })
   @IsOptional()
   images?: string[];
+
+  @IsString()
+  @IsEnum(ProductType)
+  public type: ProductType;
 }

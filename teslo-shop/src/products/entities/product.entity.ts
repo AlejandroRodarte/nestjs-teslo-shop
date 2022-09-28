@@ -10,7 +10,11 @@ import {
 } from 'typeorm';
 import { ProductSize } from '../../common/enums/product-size.enum';
 import { ProductGender } from '../../common/enums/product-gender.enum';
-import { PRODUCT_GENDER_ENUM, PRODUCT_SIZE_ENUM } from './product.enum-names';
+import {
+  PRODUCT_GENDER_ENUM,
+  PRODUCT_SIZE_ENUM,
+  PRODUCT_TYPE_ENUM,
+} from './product.enum-names';
 import {
   UNIQUE_PRODUCT_TITLE_CONSTRAINT,
   UNIQUE_PRODUCT_SLUG_CONSTRAINT,
@@ -19,6 +23,7 @@ import {
   PRIMARY_KEY_PRODUCT_ID,
 } from './product.constraint-names';
 import { ProductImage } from './product-image.entity';
+import { ProductType } from 'src/common/enums/product-type.enum';
 
 @Entity()
 @Unique(UNIQUE_PRODUCT_TITLE_CONSTRAINT, ['title'])
@@ -67,6 +72,13 @@ export class Product {
     default: [],
   })
   tags: string[];
+
+  @Column({
+    type: 'enum',
+    enum: ProductType,
+    enumName: PRODUCT_TYPE_ENUM,
+  })
+  public type: ProductType;
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {
     cascade: true,
