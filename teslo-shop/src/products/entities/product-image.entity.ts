@@ -11,7 +11,7 @@ import {
 } from './product-image.constraint-names';
 import { Product } from './product.entity';
 
-@Entity()
+@Entity({ name: 'product_images' })
 export class ProductImage {
   @PrimaryGeneratedColumn('increment', {
     primaryKeyConstraintName: PRIMARY_KEY_PRODUCT_IMAGE_ID,

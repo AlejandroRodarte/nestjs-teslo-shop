@@ -25,7 +25,7 @@ import {
 import { ProductImage } from './product-image.entity';
 import { ProductType } from 'src/common/enums/product-type.enum';
 
-@Entity()
+@Entity({ name: 'products' })
 @Unique(UNIQUE_PRODUCT_TITLE_CONSTRAINT, ['title'])
 @Unique(UNIQUE_PRODUCT_SLUG_CONSTRAINT, ['slug'])
 @Check(POSITIVE_PRODUCT_PRICE_CONSTRAINT, '"price" > 0')
