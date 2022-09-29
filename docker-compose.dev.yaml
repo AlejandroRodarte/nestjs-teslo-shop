@@ -5,12 +5,14 @@ x-common-env-variables: &common-env-variables
 
 services:
   teslo-shop:
-    image: rodarte/nestjs-fr-teslo-shop-dev:b971275
+    image: rodarte/nestjs-fr-teslo-shop-dev:4a0bc14
     volumes:
       - ./teslo-shop:/node/app
       - /node/app/node_modules
     environment:
       <<: *common-env-variables
   teslo-shop-postgres:
+    ports:
+      - '5432:5432'
     volumes:
       - ./teslo-shop/postgres/dev:/var/lib/postgresql/data

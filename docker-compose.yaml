@@ -18,8 +18,6 @@ services:
       - teslo-shop-postgres
   teslo-shop-postgres:
     image: postgres:14.3
-    ports:
-      - '5432:5432'
     secrets:
       - teslo_shop_postgres_password
     environment:
