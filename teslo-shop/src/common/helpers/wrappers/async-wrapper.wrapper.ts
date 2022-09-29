@@ -1,4 +1,4 @@
-import { AsyncTuple } from 'src/lib/types/async-tuple.type';
+import { AsyncTuple } from 'src/common/types/async-tuple.type';
 
 export const asyncWrapper = async <ReturnType>(
   tryFn: () => Promise<ReturnType>,

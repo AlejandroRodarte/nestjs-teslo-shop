@@ -24,7 +24,7 @@ import { FindAllProductsResponseDto } from './dto/responses/find-all-products-re
 import { FlattenedImagesProductResponseDto } from './dto/responses/objects/product/flattened-images-product-response.dto';
 import { FindOneProductResponseDto } from './dto/responses/find-one-product-response.dto';
 import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
-import { asyncWrapper } from '../lib/wrappers/async-wrapper';
+import { asyncWrapper } from '../common/helpers/wrappers/async-wrapper.wrapper';
 
 @Injectable()
 export class ProductsService {

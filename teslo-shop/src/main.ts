@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import './lib/docker/set-secrets';
+import './common/init/docker/set-secrets.init';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
