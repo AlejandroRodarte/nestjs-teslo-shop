@@ -12,7 +12,7 @@ import { diskStorage } from 'multer';
 import { ACCEPTED_IMAGE_FILE_EXTENSIONS } from './constants/accepted-image-file-extensions.constants';
 import { ACCEPTED_IMAGE_MIME_TYPES } from './constants/accepted-image-mime-types.constants';
 import { FilesService } from './files.service';
-import { imageFileFilter } from './helpers/image-file-filter.helper';
+import { imageFileFilter, imageFileNamer } from './helpers';
 
 @Controller('files')
 export class FilesController {
@@ -23,7 +23,10 @@ export class FilesController {
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter: imageFileFilter,
-      storage: diskStorage({ destination: './static/uploads/products' }),
+      storage: diskStorage({
+        destination: './static/uploads/products',
+        filename: imageFileNamer,
+      }),
     }),
   )
   uploadProductImage(@UploadedFile('file') file: Express.Multer.File) {
