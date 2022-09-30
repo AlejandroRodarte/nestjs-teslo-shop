@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   HttpCode,
   HttpStatus,
@@ -7,7 +8,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ACCEPTED_IMAGE_FILE_EXTENSIONS } from './constants/accepted-image-file-extensions.constants';
+import { ACCEPTED_IMAGE_MIME_TYPES } from './constants/accepted-image-mime-types.constants';
 import { FilesService } from './files.service';
+import { imageFileFilter } from './helpers/image-file-filter.helper';
 
 @Controller('files')
 export class FilesController {
@@ -15,8 +19,14 @@ export class FilesController {
 
   @Post('product')
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { fileFilter: imageFileFilter }))
   uploadProductImage(@UploadedFile('file') file: Express.Multer.File) {
+    if (!file)
+      throw new BadRequestException(
+        `Please provide an image file. Accepted file extensions are ${ACCEPTED_IMAGE_FILE_EXTENSIONS.join(
+          ', ',
+        )}. Accepted MIME types are ${ACCEPTED_IMAGE_MIME_TYPES.join(', ')}`,
+      );
     return file;
   }
 }
