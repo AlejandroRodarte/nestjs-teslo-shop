@@ -95,6 +95,12 @@ Nest is [MIT licensed](LICENSE).
 - Path (container's filesystem) to the file that contains the PostgreSQL URI
 - Do not change it's original value: `/run/secrets/teslo_shop_postgres_url`
 
+#### `HOST_API`
+
+- *Required*
+- Defines the URL where this backend is currently living
+- Implemented as an environment variables as this URL is highly dependent on the platform where the application will be deployed
+
 ### PostgreSQL database
 
 #### `POSTGRES_USER`

@@ -6,4 +6,7 @@ export const env = () => ({
     url: process.env.POSTGRES_URL,
   },
   environment: process.env.NODE_ENV,
+  host: {
+    api: process.env.HOST_API,
+  },
 });

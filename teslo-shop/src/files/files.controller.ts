@@ -10,6 +10,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
@@ -17,10 +18,16 @@ import { ACCEPTED_IMAGE_FILE_EXTENSIONS } from './constants/accepted-image-file-
 import { ACCEPTED_IMAGE_MIME_TYPES } from './constants/accepted-image-mime-types.constants';
 import { FilesService } from './files.service';
 import { imageFileFilter, imageFileNamer } from './helpers';
+import { UploadProductImageResponseDto } from './dto/responses/upload-product-image-response.dto';
 
 @Controller('files')
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  private readonly _hostApi = this.configService.get<string>('host.api');
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly filesService: FilesService,
+  ) {}
 
   @Get('product/:imageFilename')
   findProductImage(
@@ -42,13 +49,16 @@ export class FilesController {
       }),
     }),
   )
-  uploadProductImage(@UploadedFile('file') file: Express.Multer.File) {
+  uploadProductImage(
+    @UploadedFile('file') file: Express.Multer.File,
+  ): UploadProductImageResponseDto {
     if (!file)
       throw new BadRequestException(
         `Please provide an image file. Accepted file extensions are ${ACCEPTED_IMAGE_FILE_EXTENSIONS.join(
           ', ',
         )}. Accepted MIME types are ${ACCEPTED_IMAGE_MIME_TYPES.join(', ')}`,
       );
-    return { secureUrl: file.filename };
+    const secureUrl = `${this._hostApi}/files/product/${file.filename}`;
+    return new UploadProductImageResponseDto(secureUrl);
   }
 }

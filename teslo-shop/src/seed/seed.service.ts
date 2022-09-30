@@ -5,7 +5,7 @@ import { SEED_DATA } from './data/seed.data';
 
 @Injectable()
 export class SeedService {
-  private _environment = this.configService.get<string>('environment');
+  private readonly _environment = this.configService.get<string>('environment');
 
   constructor(
     private readonly productsService: ProductsService,

@@ -14,6 +14,7 @@ services:
       <<: *common-env-variables
       PORT: 3000
       POSTGRES_URL_FILE: /run/secrets/teslo_shop_postgres_url
+      HOST_API: http://localhost:3000/api
     depends_on:
       - teslo-shop-postgres
   teslo-shop-postgres:
