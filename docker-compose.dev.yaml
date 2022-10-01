@@ -5,7 +5,7 @@ x-common-env-variables: &common-env-variables
 
 services:
   teslo-shop:
-    image: rodarte/nestjs-fr-teslo-shop-dev:4a0bc14
+    image: rodarte/nestjs-fr-teslo-shop-dev:dbe8626
     volumes:
       - ./teslo-shop:/node/app
       - /node/app/node_modules
