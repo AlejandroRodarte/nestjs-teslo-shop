@@ -1,15 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, DeepPartial, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, DeepPartial, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/requests/create-product.dto';
 import { UpdateProductDto } from './dto/requests/update-product.dto';
 import { Product, ProductImage } from './entities';
-import { NOT_NULL_VIOLATION } from '../common/codes/postgresql-error.codes';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { slugRegex } from '../common/regex/slug.regex';
 import { uuidRegex } from '../common/regex/uuid.regex';
@@ -25,16 +19,19 @@ import { FlattenedImagesProductResponseDto } from './dto/responses/objects/produ
 import { FindOneProductResponseDto } from './dto/responses/find-one-product-response.dto';
 import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
 import { asyncWrapper } from '../common/helpers/wrappers/async-wrapper.wrapper';
+import { RepositoryService } from '../common/services/repository.service';
 
 @Injectable()
-export class ProductsService {
+export class ProductsService extends RepositoryService<{ product: Product }> {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     @InjectRepository(ProductImage)
     private readonly productImageRepository: Repository<ProductImage>,
     private readonly dataSource: DataSource,
-  ) {}
+  ) {
+    super();
+  }
 
   async create(
     createProductDto: CreateProductDto,
@@ -53,7 +50,7 @@ export class ProductsService {
       const newProduct = await this.productRepository.save(product);
       return newProduct;
     });
-    if (error) this._handleError(error, product);
+    if (error) this._handleError(error, { product });
     return FlattenedImagesProductResponseDto.buildFromProductEntity(
       savedProduct,
     );
@@ -139,7 +136,7 @@ export class ProductsService {
       rollback,
       close,
     );
-    if (error) this._handleError(error, productWithUpdates);
+    if (error) this._handleError(error, { product: productWithUpdates });
 
     return FlattenedImagesProductResponseDto.buildFromProductEntity(
       updatedProduct,
@@ -192,28 +189,10 @@ export class ProductsService {
     return product;
   }
 
-  private _handleError(error: Error, product?: Product): void {
-    if (error instanceof QueryFailedError)
-      this._handleQueryFailedError(error, product);
-    throw new InternalServerErrorException(
-      'An error that is not of type QueryFailedError was thrown. Create a custom handler!',
-    );
-  }
-
-  private _handleQueryFailedError(
-    error: QueryFailedError,
-    product?: Product,
-  ): void {
-    if (product && error.driverError.constraint) {
-      const constraint = error.driverError.constraint as string;
-      throw new BadRequestException(
-        this._getConstraintMessage(constraint, product),
-      );
-    }
-    throw new BadRequestException(this._getCodeMessage(error));
-  }
-
-  private _getConstraintMessage(constraint: string, product: Product): string {
+  protected _getConstraintMessage(
+    constraint: string,
+    { product }: { product: Product },
+  ): string {
     switch (constraint) {
       case UNIQUE_PRODUCT_TITLE_CONSTRAINT:
         return `There is already a product named '${product.title}' in the database`;
@@ -225,18 +204,6 @@ export class ProductsService {
         return 'Product stock should be greater or equal than 0';
       default:
         return 'Unhandled constraint type. Create a custom message!';
-    }
-  }
-
-  private _getCodeMessage(error: QueryFailedError): string {
-    const code = +error.driverError.code;
-    switch (code) {
-      case NOT_NULL_VIOLATION: {
-        const column = error.driverError.column as string;
-        return `Field '${column}' must not be null`;
-      }
-      default:
-        return 'Unhandled PostgreSQL code. Create a custom message!';
     }
   }
 
