@@ -8,15 +8,22 @@ import { PASSWORD_HASHING_ADAPTER_AUTH_SERVICE } from './interfaces/password-has
 import { BcryptAdapter } from 'src/common/adapters/bcrypt.adapter';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   controllers: [AuthController],
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '2h' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const jwtSecret = configService.get<string>('jwt.secret');
+        return {
+          secret: jwtSecret,
+          signOptions: { expiresIn: '2h' },
+        };
+      },
     }),
     CommonModule,
   ],
