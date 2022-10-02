@@ -8,4 +8,12 @@ export class BcryptAdapter implements PasswordHashingAdapter {
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
     return hashedPassword;
   }
+
+  async compare(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    const result = await bcrypt.compare(plainPassword, hashedPassword);
+    return result;
+  }
 }

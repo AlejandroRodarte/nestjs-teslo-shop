@@ -1,7 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SignUpUserDto } from './dto/requests/sign-up-user.dto';
+import { SignUpUserDto, SignInUserDto } from './dto/requests';
 import { User } from './entities/user.entity';
 import { asyncWrapper } from '../common/helpers/wrappers/async-wrapper.wrapper';
 import { RepositoryService } from '../common/services/repository.service';
@@ -13,6 +13,7 @@ import { PASSWORD_HASHING_ADAPTER_AUTH_SERVICE } from './interfaces/password-has
 import { PasswordHashingAdapter } from 'src/common/interfaces/password-hashing-adapter.interface';
 import { SignUpResponseDto } from './dto/responses/sign-up-response.dto';
 import { PublicUserInformationResponseDto } from './dto/responses/objects/user/public-user-information-response.dto';
+import { SignInResponseDto } from './dto/responses/sign-in-response.dto';
 
 @Injectable()
 export class AuthService extends RepositoryService<{ user: User }> {
@@ -45,6 +46,36 @@ export class AuthService extends RepositoryService<{ user: User }> {
     if (saveError) this._handleError(saveError, { user });
 
     return PublicUserInformationResponseDto.buildFromUserEntity(savedUser);
+  }
+
+  async signIn(signInUserDto: SignInUserDto): Promise<SignInResponseDto> {
+    const [foundUser, findOneError] = await asyncWrapper(async () => {
+      const foundUser = await this.userRepository.findOne({
+        where: { email: signInUserDto.email },
+      });
+      return foundUser;
+    });
+    if (findOneError) this._handleError(findOneError);
+    if (!foundUser)
+      throw new UnauthorizedException(
+        'Authenthication failed. Please revise your credentials',
+      );
+
+    const [isPasswordCorrect, hasherError] = await asyncWrapper(async () => {
+      const result = await this.passwordHasher.compare(
+        signInUserDto.password,
+        foundUser.password,
+      );
+      return result;
+    });
+    if (hasherError) this._handleError(hasherError);
+
+    if (!isPasswordCorrect)
+      throw new UnauthorizedException(
+        'Authenthication failed. Please revise your credentials',
+      );
+
+    return PublicUserInformationResponseDto.buildFromUserEntity(foundUser);
   }
 
   protected _getConstraintMessage(
