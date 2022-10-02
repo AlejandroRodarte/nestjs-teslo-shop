@@ -89,9 +89,15 @@ Nest is [MIT licensed](LICENSE).
 - Defaults to `3000` if not specified
 - Change it to any port that you have available in your computer
 
-#### `POSTGRES_URL_FILE`
+#### `POSTGRES_URL`
 
 - *Required*
+- Defines the connection URI where the PostgreSQL database is living at
+- Set it to a valid PostgreSQL URI
+
+#### `POSTGRES_URL_FILE`
+
+- *Required* when running the application with `docker` and `docker-compose`
 - Path (container's filesystem) to the file that contains the PostgreSQL URI
 - Do not change it's original value: `/run/secrets/teslo_shop_postgres_url`
 
@@ -100,6 +106,17 @@ Nest is [MIT licensed](LICENSE).
 - *Required*
 - Defines the URL where this backend is currently living
 - Implemented as an environment variables as this URL is highly dependent on the platform where the application will be deployed
+
+#### `JWT_SECRET`
+
+- *Required*
+- Defines the secret used to server-sign the JSON Web Tokens emitted by this application for user authentication
+
+#### `JWT_SECRET_FILE`
+
+- *Required* when running the application with `docker` and `docker-compose`
+- Path (container's filesystem) to the file that contains the JSON Web Token secret string
+- Do not change it's original value: `/run/secrets/teslo_shop_jwt_secret`
 
 ### PostgreSQL database
 
@@ -132,11 +149,13 @@ Nest is [MIT licensed](LICENSE).
 1. Open the `docker-compose.yaml` file
 2. At `services.teslo-shop.image`, update tag of image `rodarte/nestjs-fr-teslo-shop-prod` to one of the available tags found at the [Docker Hub](https://hub.docker.com/repository/docker/rodarte/nestjs-fr-teslo-shop-prod) repository, or to an image tag that you built in your own computer using the `Dockerfile`
 3. At the root of this project, create a `secrets/docker/teslo-shop-postgres/postgres-password.txt` and store the sensible password of superuser `POSTGRES_USER`
-4. At the root of this project, create a `secrets/docker/teslo-shop/postgres-url.txt` and store a string that matches a valid PostgreSQL URI
+4. At the root of this project, create a `secrets/docker/teslo-shop/postgres-url.txt` file and store a string that matches a valid PostgreSQL URI
 
 ```txt
 postgres://<username>:<password>@<domain>:<port>/<database-name>
 ```
+
+5. At the root of this project, create a `secrets/docker/teslo-shop/jwt-secret.txt` file and store a strong, secure password string
 
 - `<username>` must be equal to what `POSTGRES_USER` is equal to
 - `<password>` must be equal to the string stored at `secrets/docker/teslo-shop-postgres/postgres-password.txt`
@@ -160,6 +179,8 @@ docker-compose up
 ```txt
 postgres://<username>:<password>@<domain>:<port>/<database-name>
 ```
+
+5. At the root of this project, create a `secrets/docker/teslo-shop/jwt-secret.txt` file and store a strong, secure password string
 
 - `<username>` must be equal to what `POSTGRES_USER` is equal to
 - `<password>` must be equal to the string stored at `secrets/docker/teslo-shop-postgres/postgres-password.txt`

@@ -9,4 +9,7 @@ export const env = () => ({
   host: {
     api: process.env.HOST_API,
   },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+  },
 });
