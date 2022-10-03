@@ -1,5 +1,13 @@
 import { UserRole } from 'src/common/enums/user-role.enum';
-import { Check, Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Check,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { MATCHES_REGEX_USER_EMAIL_CONSTRAINT } from './user.constraint-names';
 import {
   PRIMARY_KEY_USER_ID,
@@ -39,4 +47,14 @@ export class User {
     default: [UserRole.USER],
   })
   public roles: UserRole[];
+
+  @BeforeInsert()
+  sanitizeBeforeInsert() {
+    this.email = this.email.toLowerCase().trim();
+  }
+
+  @BeforeUpdate()
+  sanitizeBeforeUpdate() {
+    this.email = this.email.toLowerCase().trim();
+  }
 }

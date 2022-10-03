@@ -1,6 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { SignUpUserDto, SignInUserDto } from './dto/requests';
 import { User } from './entities/user.entity';
 import { asyncWrapper } from '../common/helpers/wrappers/async-wrapper.wrapper';
@@ -14,6 +15,7 @@ import { PasswordHashingAdapter } from 'src/common/interfaces/password-hashing-a
 import { SignUpResponseDto } from './dto/responses/sign-up-response.dto';
 import { PublicUserInformationResponseDto } from './dto/responses/objects/user/public-user-information-response.dto';
 import { SignInResponseDto } from './dto/responses/sign-in-response.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService extends RepositoryService<{ user: User }> {
@@ -21,6 +23,7 @@ export class AuthService extends RepositoryService<{ user: User }> {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @Inject(PASSWORD_HASHING_ADAPTER_AUTH_SERVICE)
     private readonly passwordHasher: PasswordHashingAdapter,
+    private readonly jwtService: JwtService,
   ) {
     super();
   }
@@ -45,7 +48,10 @@ export class AuthService extends RepositoryService<{ user: User }> {
     });
     if (saveError) this._handleError(saveError, { user });
 
-    return PublicUserInformationResponseDto.buildFromUserEntity(savedUser);
+    return new SignUpResponseDto(
+      PublicUserInformationResponseDto.buildFromUserEntity(savedUser),
+      this._generateToken({ email: savedUser.email }),
+    );
   }
 
   async signIn(signInUserDto: SignInUserDto): Promise<SignInResponseDto> {
@@ -75,7 +81,15 @@ export class AuthService extends RepositoryService<{ user: User }> {
         'Authenthication failed. Please revise your credentials',
       );
 
-    return PublicUserInformationResponseDto.buildFromUserEntity(foundUser);
+    return new SignInResponseDto(
+      PublicUserInformationResponseDto.buildFromUserEntity(foundUser),
+      this._generateToken({ email: foundUser.email }),
+    );
+  }
+
+  private _generateToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 
   protected _getConstraintMessage(

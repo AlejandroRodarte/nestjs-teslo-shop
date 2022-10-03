@@ -1,3 +1,8 @@
 import { PublicUserInformationResponseDto } from './objects/user/public-user-information-response.dto';
 
-export type SignUpResponseDto = PublicUserInformationResponseDto;
+export class SignUpResponseDto {
+  constructor(
+    public user: PublicUserInformationResponseDto,
+    public token: string,
+  ) {}
+}
