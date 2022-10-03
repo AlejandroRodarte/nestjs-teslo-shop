@@ -20,6 +20,7 @@ import { FindOneProductResponseDto } from './dto/responses/find-one-product-resp
 import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
 import { asyncWrapper } from '../common/helpers/wrappers/async-wrapper.wrapper';
 import { RepositoryService } from '../common/services/repository.service';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService extends RepositoryService<{ product: Product }> {
@@ -35,6 +36,7 @@ export class ProductsService extends RepositoryService<{ product: Product }> {
 
   async create(
     createProductDto: CreateProductDto,
+    user: User,
   ): Promise<CreateProductResponseDto> {
     const { images = [], ...primitiveProductData } = createProductDto;
 
@@ -43,6 +45,7 @@ export class ProductsService extends RepositoryService<{ product: Product }> {
       images: images.map((image) =>
         this.productImageRepository.create({ url: image }),
       ),
+      user,
     };
 
     const product = this.productRepository.create(productAttributes);
@@ -67,6 +70,7 @@ export class ProductsService extends RepositoryService<{ product: Product }> {
         skip: offset,
         relations: {
           images: true,
+          user: true,
         },
       });
       return foundProducts;
@@ -175,6 +179,7 @@ export class ProductsService extends RepositoryService<{ product: Product }> {
     }
 
     productsQueryBuilder.leftJoinAndSelect('p.images', 'p_images');
+    productsQueryBuilder.leftJoinAndSelect('p.user', 'p_user');
 
     const [product, error] = await asyncWrapper(async () => {
       const foundProduct = await productsQueryBuilder.getOne();

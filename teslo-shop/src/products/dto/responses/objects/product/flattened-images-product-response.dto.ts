@@ -1,6 +1,7 @@
 import { ProductGender } from 'src/common/enums/product-gender.enum';
 import { ProductSize } from 'src/common/enums/product-size.enum';
 import { Product } from '../../../../entities/product.entity';
+import { ProductUserResponseDto } from '../user/product-user-response.dto';
 
 export class FlattenedImagesProductResponseDto {
   constructor(
@@ -14,6 +15,7 @@ export class FlattenedImagesProductResponseDto {
     public gender: ProductGender,
     public tags: string[],
     public images: string[],
+    public user: ProductUserResponseDto,
   ) {}
 
   static buildFromProductEntity(
@@ -30,6 +32,11 @@ export class FlattenedImagesProductResponseDto {
       productEntity.gender,
       productEntity.tags,
       productEntity.images.map((productImage) => productImage.url),
+      new ProductUserResponseDto(
+        productEntity.user.id,
+        productEntity.user.email,
+        productEntity.user.fullName,
+      ),
     );
   }
 

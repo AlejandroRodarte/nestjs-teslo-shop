@@ -19,8 +19,9 @@ import { FindAllProductsResponseDto } from './dto/responses/find-all-products-re
 import { CreateProductResponseDto } from './dto/responses/create-product-response.dto';
 import { FindOneProductResponseDto } from './dto/responses/find-one-product-response.dto';
 import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
-import { Auth } from 'src/auth/decorators';
+import { Auth, GetUser } from 'src/auth/decorators';
 import { UserRole } from 'src/common/enums/user-role.enum';
+import { User } from 'src/auth/entities/user.entity';
 
 @Controller('products')
 export class ProductsController {
@@ -31,8 +32,9 @@ export class ProductsController {
   @Auth({ validRoles: [UserRole.USER] })
   create(
     @Body() createProductDto: CreateProductDto,
+    @GetUser() user: User,
   ): Promise<CreateProductResponseDto> {
-    return this.productsService.create(createProductDto);
+    return this.productsService.create(createProductDto, user);
   }
 
   @Get()

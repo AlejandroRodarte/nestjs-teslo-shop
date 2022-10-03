@@ -16,7 +16,7 @@ export class SeedService {
     if (this._environment !== 'production')
       await this.productsService.deleteAllProducts();
     for (const product of SEED_DATA.products)
-      await this.productsService.create(product);
+      await this.productsService.create(product, null);
     return `${SEED_DATA.products.length} products have been added to the database`;
   }
 }
