@@ -5,6 +5,7 @@ import {
   Check,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -14,6 +15,7 @@ import {
   UNIQUE_USER_EMAIL_CONSTRAINT,
 } from './user.constraint-names';
 import { USER_ROLE_ENUM } from './user.enum-names';
+import { Product } from '../../products/entities/product.entity';
 
 @Entity({ name: 'users' })
 @Unique(UNIQUE_USER_EMAIL_CONSTRAINT, ['email'])
@@ -47,6 +49,11 @@ export class User {
     default: [UserRole.USER],
   })
   public roles: UserRole[];
+
+  @OneToMany(() => Product, (product) => product.user, {
+    cascade: true,
+  })
+  public products?: Product[];
 
   @BeforeInsert()
   sanitizeBeforeInsert() {

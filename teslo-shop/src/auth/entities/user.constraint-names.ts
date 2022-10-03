@@ -1,6 +1,6 @@
-export const PRIMARY_KEY_USER_ID = 'primary_key_user_id';
+export const PRIMARY_KEY_USER_ID = 'pk_user_id';
 
-export const UNIQUE_USER_EMAIL_CONSTRAINT = 'unique_user_email_constraint';
+export const UNIQUE_USER_EMAIL_CONSTRAINT = 'uk_user_email';
 
 export const MATCHES_REGEX_USER_EMAIL_CONSTRAINT =
-  'matches_regex_user_email_constraint';
+  'chk_matches_regex_user_email';

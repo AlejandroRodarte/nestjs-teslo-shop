@@ -4,6 +4,8 @@ import {
   Check,
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
@@ -21,9 +23,11 @@ import {
   POSITIVE_PRODUCT_PRICE_CONSTRAINT,
   POSITIVE_OR_ZERO_PRODUCT_STOCK_CONSTRAINT,
   PRIMARY_KEY_PRODUCT_ID,
+  FOREIGN_KEY_USER_PRODUCT,
 } from './product.constraint-names';
 import { ProductImage } from './product-image.entity';
 import { ProductType } from 'src/common/enums/product-type.enum';
+import { User } from 'src/auth/entities/user.entity';
 
 @Entity({ name: 'products' })
 @Unique(UNIQUE_PRODUCT_TITLE_CONSTRAINT, ['title'])
@@ -84,6 +88,15 @@ export class Product {
     cascade: true,
   })
   public images?: ProductImage[];
+
+  @ManyToOne(() => User, (user) => user.products, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({
+    name: 'user_id',
+    foreignKeyConstraintName: FOREIGN_KEY_USER_PRODUCT,
+  })
+  public user: User;
 
   @BeforeInsert()
   setSlug(): void {
