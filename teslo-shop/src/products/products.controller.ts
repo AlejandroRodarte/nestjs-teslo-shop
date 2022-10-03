@@ -19,6 +19,8 @@ import { FindAllProductsResponseDto } from './dto/responses/find-all-products-re
 import { CreateProductResponseDto } from './dto/responses/create-product-response.dto';
 import { FindOneProductResponseDto } from './dto/responses/find-one-product-response.dto';
 import { UpdateProductResponseDto } from './dto/responses/update-product-response.dto';
+import { Auth } from 'src/auth/decorators';
+import { UserRole } from 'src/common/enums/user-role.enum';
 
 @Controller('products')
 export class ProductsController {
@@ -26,6 +28,7 @@ export class ProductsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Auth({ validRoles: [UserRole.USER] })
   create(
     @Body() createProductDto: CreateProductDto,
   ): Promise<CreateProductResponseDto> {
@@ -45,6 +48,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @Auth({ validRoles: [UserRole.ADMIN] })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -54,6 +58,7 @@ export class ProductsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Auth({ validRoles: [UserRole.ADMIN] })
   remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.productsService.remove(id);
   }
