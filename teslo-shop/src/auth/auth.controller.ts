@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  SetMetadata,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RawHeaders } from 'src/common/decorators/raw-headers.decorator';
 import { AuthService } from './auth.service';
@@ -7,6 +14,7 @@ import { SignInUserDto, SignUpUserDto } from './dto/requests';
 import { SignInResponseDto } from './dto/responses/sign-in-response.dto';
 import { SignUpResponseDto } from './dto/responses/sign-up-response.dto';
 import { User } from './entities/user.entity';
+import { UserRoleGuard } from './guards/user-role.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +28,13 @@ export class AuthController {
     @RawHeaders() rawHeaders: string[],
   ) {
     console.log(rawHeaders);
+    return user;
+  }
+
+  @Get('admin')
+  @SetMetadata('roles', ['admin', 'super-user'])
+  @UseGuards(AuthGuard(), UserRoleGuard)
+  adminRouteTest(@GetUser() user: User) {
     return user;
   }
 
