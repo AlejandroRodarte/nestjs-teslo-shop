@@ -16,6 +16,7 @@ import { SignUpResponseDto } from './dto/responses/sign-up-response.dto';
 import { PublicUserInformationResponseDto } from './dto/responses/objects/user/public-user-information-response.dto';
 import { SignInResponseDto } from './dto/responses/sign-in-response.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { GetNewTokenResponseDto } from './dto/responses/get-new-token-response.dto';
 
 @Injectable()
 export class AuthService extends RepositoryService<{ user: User }> {
@@ -69,9 +70,9 @@ export class AuthService extends RepositoryService<{ user: User }> {
     );
   }
 
-  private _generateToken(payload: JwtPayload) {
-    const token = this.jwtService.sign(payload);
-    return token;
+  getNewToken(userId: string): GetNewTokenResponseDto {
+    const newToken = this._generateToken({ id: userId });
+    return new GetNewTokenResponseDto(newToken);
   }
 
   async saveNewUserEntity(signUpUserDto: SignUpUserDto): Promise<User> {
@@ -96,6 +97,14 @@ export class AuthService extends RepositoryService<{ user: User }> {
     return savedUser;
   }
 
+  async deleteAllUsers(): Promise<void> {
+    const [, error] = await asyncWrapper(async () => {
+      const deleteResult = await this.userRepository.delete({});
+      return deleteResult;
+    });
+    if (error) this._handleError(error);
+  }
+
   protected _getConstraintMessage(
     constraint: string,
     { user }: { user: User },
@@ -110,11 +119,8 @@ export class AuthService extends RepositoryService<{ user: User }> {
     }
   }
 
-  async deleteAllUsers(): Promise<void> {
-    const [, error] = await asyncWrapper(async () => {
-      const deleteResult = await this.userRepository.delete({});
-      return deleteResult;
-    });
-    if (error) this._handleError(error);
+  private _generateToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 }

@@ -9,6 +9,7 @@ import { User } from './entities/user.entity';
 import { UserRoleGuard } from './guards/user-role.guard';
 import { UserRole } from '../common/enums/user-role.enum';
 import { RoleProtected, GetUser, Auth } from './decorators';
+import { GetNewTokenResponseDto } from './dto/responses/get-new-token-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -46,5 +47,13 @@ export class AuthController {
   @Post('sign-in')
   signIn(@Body() signInUserDto: SignInUserDto): Promise<SignInResponseDto> {
     return this.authService.signIn(signInUserDto);
+  }
+
+  @Get('get-new-token')
+  @Auth()
+  getNewToken(
+    @GetUser<string>({ field: 'id' }) userId: string,
+  ): GetNewTokenResponseDto {
+    return this.authService.getNewToken(userId);
   }
 }
