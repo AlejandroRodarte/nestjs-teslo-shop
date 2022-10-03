@@ -15,6 +15,8 @@ import { SignInResponseDto } from './dto/responses/sign-in-response.dto';
 import { SignUpResponseDto } from './dto/responses/sign-up-response.dto';
 import { User } from './entities/user.entity';
 import { UserRoleGuard } from './guards/user-role.guard';
+import { UserRole } from '../common/enums/user-role.enum';
+import { ROLES } from './constants/metadata-keys.constants';
 
 @Controller('auth')
 export class AuthController {
@@ -32,7 +34,7 @@ export class AuthController {
   }
 
   @Get('admin')
-  @SetMetadata('roles', ['admin', 'super-user'])
+  @SetMetadata(ROLES, [UserRole.ADMIN, UserRole.SUPERUSER])
   @UseGuards(AuthGuard(), UserRoleGuard)
   adminRouteTest(@GetUser() user: User) {
     return user;
