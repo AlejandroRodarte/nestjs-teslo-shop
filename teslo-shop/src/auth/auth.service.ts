@@ -50,7 +50,7 @@ export class AuthService extends RepositoryService<{ user: User }> {
 
     return new SignUpResponseDto(
       PublicUserInformationResponseDto.buildFromUserEntity(savedUser),
-      this._generateToken({ email: savedUser.email }),
+      this._generateToken({ id: savedUser.id }),
     );
   }
 
@@ -83,7 +83,7 @@ export class AuthService extends RepositoryService<{ user: User }> {
 
     return new SignInResponseDto(
       PublicUserInformationResponseDto.buildFromUserEntity(foundUser),
-      this._generateToken({ email: foundUser.email }),
+      this._generateToken({ id: foundUser.id }),
     );
   }
 
