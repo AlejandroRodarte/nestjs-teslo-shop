@@ -1,9 +1,24 @@
 import { ProductGender } from 'src/common/enums/product-gender.enum';
 import { ProductSize } from 'src/common/enums/product-size.enum';
 import { ProductType } from 'src/common/enums/product-type.enum';
+import { UserRole } from 'src/common/enums/user-role.enum';
 import { SeedData } from '../interfaces/seed-data.interface';
 
 export const SEED_DATA: SeedData = {
+  users: [
+    {
+      email: 'test1@google.com',
+      fullName: 'Test 1',
+      password: 'Wakala69.',
+      roles: [UserRole.ADMIN],
+    },
+    {
+      email: 'test2@google.com',
+      fullName: 'Test 2',
+      password: 'Wakala69.',
+      roles: [UserRole.USER, UserRole.SUPERUSER],
+    },
+  ],
   products: [
     {
       description:

@@ -29,25 +29,7 @@ export class AuthService extends RepositoryService<{ user: User }> {
   }
 
   async signUp(signUpUserDto: SignUpUserDto): Promise<SignUpResponseDto> {
-    const [hashedPassword, hashError] = await asyncWrapper(async () => {
-      const hashedPassword = await this.passwordHasher.hash(
-        signUpUserDto.password,
-      );
-      return hashedPassword;
-    });
-    if (hashError) this._handleError(hashError);
-
-    const user = this.userRepository.create({
-      ...signUpUserDto,
-      password: hashedPassword,
-    });
-
-    const [savedUser, saveError] = await asyncWrapper(async () => {
-      const savedUser = await this.userRepository.save(user);
-      return savedUser;
-    });
-    if (saveError) this._handleError(saveError, { user });
-
+    const savedUser = await this.saveNewUserEntity(signUpUserDto);
     return new SignUpResponseDto(
       PublicUserInformationResponseDto.buildFromUserEntity(savedUser),
       this._generateToken({ id: savedUser.id }),
@@ -92,6 +74,28 @@ export class AuthService extends RepositoryService<{ user: User }> {
     return token;
   }
 
+  async saveNewUserEntity(signUpUserDto: SignUpUserDto): Promise<User> {
+    const [hashedPassword, hashError] = await asyncWrapper(async () => {
+      const hashedPassword = await this.passwordHasher.hash(
+        signUpUserDto.password,
+      );
+      return hashedPassword;
+    });
+    if (hashError) this._handleError(hashError);
+
+    const user = this.userRepository.create({
+      ...signUpUserDto,
+      password: hashedPassword,
+    });
+
+    const [savedUser, saveError] = await asyncWrapper(async () => {
+      const savedUser = await this.userRepository.save(user);
+      return savedUser;
+    });
+    if (saveError) this._handleError(saveError, { user });
+    return savedUser;
+  }
+
   protected _getConstraintMessage(
     constraint: string,
     { user }: { user: User },
@@ -104,5 +108,13 @@ export class AuthService extends RepositoryService<{ user: User }> {
       default:
         return 'Unhandled constraint type. Create a custom message!';
     }
+  }
+
+  async deleteAllUsers(): Promise<void> {
+    const [, error] = await asyncWrapper(async () => {
+      const deleteResult = await this.userRepository.delete({});
+      return deleteResult;
+    });
+    if (error) this._handleError(error);
   }
 }

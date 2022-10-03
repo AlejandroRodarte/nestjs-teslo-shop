@@ -8,7 +8,7 @@ export class SeedController {
 
   @Get()
   @Auth({ validRoles: [UserRole.ADMIN] })
-  populate() {
+  populate(): Promise<string> {
     return this.seedService.populate();
   }
 }
