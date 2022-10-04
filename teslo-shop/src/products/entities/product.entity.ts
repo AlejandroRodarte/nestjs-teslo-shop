@@ -43,7 +43,7 @@ export class Product {
   @Column({ type: 'text' })
   public title: string;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'float', default: 0.01 })
   public price: number;
 
   @Column({ type: 'text', nullable: true })
