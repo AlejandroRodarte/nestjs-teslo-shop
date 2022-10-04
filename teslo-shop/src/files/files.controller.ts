@@ -14,12 +14,14 @@ import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
+import { ApiTags } from '@nestjs/swagger';
 import { ACCEPTED_IMAGE_FILE_EXTENSIONS } from './constants/accepted-image-file-extensions.constants';
 import { ACCEPTED_IMAGE_MIME_TYPES } from './constants/accepted-image-mime-types.constants';
 import { FilesService } from './files.service';
 import { imageFileFilter, imageFileNamer } from './helpers';
 import { UploadProductImageResponseDto } from './dto/responses/upload-product-image-response.dto';
 
+@ApiTags('Files')
 @Controller('files')
 export class FilesController {
   private readonly _hostApi = this.configService.get<string>('host.api');

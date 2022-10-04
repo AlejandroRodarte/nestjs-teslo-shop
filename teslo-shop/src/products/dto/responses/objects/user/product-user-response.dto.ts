@@ -1,7 +1,18 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class ProductUserResponseDto {
-  constructor(
-    public id: string,
-    public email: string,
-    public fullName: string,
-  ) {}
+  @ApiProperty()
+  public id: string;
+
+  @ApiProperty()
+  public email: string;
+
+  @ApiProperty()
+  public fullName: string;
+
+  constructor(id: string, email: string, fullName: string) {
+    this.id = id;
+    this.email = email;
+    this.fullName = fullName;
+  }
 }
