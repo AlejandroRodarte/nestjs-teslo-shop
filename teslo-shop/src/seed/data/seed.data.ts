@@ -10,7 +10,7 @@ export const SEED_DATA: SeedData = {
       email: 'test1@google.com',
       fullName: 'Test 1',
       password: 'Wakala69.',
-      roles: [UserRole.ADMIN],
+      roles: [UserRole.USER, UserRole.ADMIN],
     },
     {
       email: 'test2@google.com',

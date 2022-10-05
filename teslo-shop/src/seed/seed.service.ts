@@ -4,6 +4,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { SEED_DATA } from './data/seed.data';
 import { ProductsService } from '../products/products.service';
 import { User } from 'src/auth/entities/user.entity';
+import { PopulateResponseDto } from './dto/responses/populate-response-dto';
 
 @Injectable()
 export class SeedService {
@@ -15,13 +16,15 @@ export class SeedService {
     private readonly configService: ConfigService,
   ) {}
 
-  async populate(): Promise<string> {
+  async populate(): Promise<PopulateResponseDto> {
     if (this._environment !== 'production') {
       await this._purge();
       await this._seed();
-      return `Database seeded`;
+      return new PopulateResponseDto('Database seeded');
     }
-    return 'Seeding not available in production environment';
+    return new PopulateResponseDto(
+      'Seeding not available in production environment',
+    );
   }
 
   private async _purge() {

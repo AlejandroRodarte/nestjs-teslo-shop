@@ -20,7 +20,19 @@ async function bootstrap() {
     .setTitle('Teslo-Shop RESTful API')
     .setDescription('Test-Shop endpoints')
     .setVersion('0.0.1')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter a valid JSON Web Token',
+        in: 'header',
+      },
+      'JWT-Auth',
+    )
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 

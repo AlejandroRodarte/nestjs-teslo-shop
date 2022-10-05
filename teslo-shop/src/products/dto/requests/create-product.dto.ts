@@ -14,8 +14,8 @@ import {
 import { ProductGender } from 'src/common/enums/product-gender.enum';
 import { ProductSize } from 'src/common/enums/product-size.enum';
 import { ProductType } from 'src/common/enums/product-type.enum';
-import { imageUrlRegex } from 'src/common/regex/image-url.regex';
 import { slugRegex } from 'src/common/regex/slug.regex';
+import { imageFilenameRegex } from '../../../common/regex/image-filename-regex';
 
 export class CreateProductDto {
   @IsString()
@@ -79,6 +79,7 @@ export class CreateProductDto {
     example: [ProductSize.M, ProductSize.XL],
     description: 'Product Available Sizes',
     required: true,
+    isArray: true,
   })
   public sizes: ProductSize[];
 
@@ -99,19 +100,22 @@ export class CreateProductDto {
     example: ['hoodie'],
     description: 'Product Tags',
     required: false,
+    isArray: true,
     default: [],
   })
   public tags?: string[];
 
   @IsString({ each: true })
   @IsArray()
-  @Matches(imageUrlRegex, { each: true })
+  @Matches(imageFilenameRegex, { each: true })
   @IsOptional()
   @ApiProperty({
     example: ['1740176-00-A_0_2000.jpg', '1740176-00-A_1.jpg'],
     description: 'Product Images',
     required: false,
+    isArray: true,
     default: [],
+    pattern: imageFilenameRegex.toString(),
   })
   images?: string[];
 
