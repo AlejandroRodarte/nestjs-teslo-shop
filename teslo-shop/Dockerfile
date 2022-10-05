@@ -54,7 +54,7 @@ ENV NODE_ENV development
 
 WORKDIR /node/app
 
-HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=3 CMD curl -f http://localhost:${PORT}/api/v2/health/healthz || exit 1
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=3 CMD curl -f http://localhost:${PORT}/api/health/healthz || exit 1
 
 USER node
 
@@ -90,7 +90,7 @@ LABEL com.rodarte.nestjs.fr.teslo.shop.stage prod
 COPY --chown=node:node --from=build /node/dist ./dist
 COPY --chown=node:node --from=build /node/public ./public
 
-HEALTHCHECK --interval=10s --timeout=10s --start-period=10s --retries=3 CMD curl -f http://localhost:${PORT}/api/v2/health/healthz || exit 1
+HEALTHCHECK --interval=10s --timeout=10s --start-period=10s --retries=3 CMD curl -f http://localhost:${PORT}/api/health/healthz || exit 1
 
 USER node
 

@@ -146,7 +146,7 @@ Nest is [MIT licensed](LICENSE).
 
 #### Production
 
-1. Open the `docker-compose.yaml` file
+1. Open the `docker-compose.prod.yaml` file
 2. At `services.teslo-shop.image`, update tag of image `rodarte/nestjs-fr-teslo-shop-prod` to one of the available tags found at the [Docker Hub](https://hub.docker.com/repository/docker/rodarte/nestjs-fr-teslo-shop-prod) repository, or to an image tag that you built in your own computer using the `Dockerfile`
 3. At the root of this project, create a `secrets/docker/teslo-shop-postgres/postgres-password.txt` and store the sensible password of superuser `POSTGRES_USER`
 4. At the root of this project, create a `secrets/docker/teslo-shop/postgres-url.txt` file and store a string that matches a valid PostgreSQL URI
@@ -163,10 +163,10 @@ postgres://<username>:<password>@<domain>:<port>/<database-name>
 - `<port>` is the default PostgreSQL port (`5432`)
 - `<database-name>` must be equal to what `POSTGRES_DB` is equal to
 
-5. Run command
+6. Run command
 
 ```sh
-docker-compose up
+docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml up
 ```
 
 #### Development
@@ -188,7 +188,7 @@ postgres://<username>:<password>@<domain>:<port>/<database-name>
 - `<port>` is the default PostgreSQL port (`5432`)
 - `<database-name>` must be equal to what `POSTGRES_DB` is equal to
 
-5. Run command
+6. Run command
 
 ```sh
 docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up

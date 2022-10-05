@@ -1,24 +1,18 @@
 version: '3.4'
 
-x-common-env-variables: &common-env-variables
-  NODE_ENV: production-docker
-
 services:
   teslo-shop:
-    image: rodarte/nestjs-fr-teslo-shop-prod:3a19300
-    ports:
-      - '3000:3000'
     secrets:
       - teslo_shop_postgres_url
       - teslo_shop_jwt_secret
     environment:
-      <<: *common-env-variables
-      PORT: 3000
       POSTGRES_URL_FILE: /run/secrets/teslo_shop_postgres_url
       JWT_SECRET_FILE: /run/secrets/teslo_shop_jwt_secret
-      HOST_API: http://localhost:3000/api
     depends_on:
       - teslo-shop-postgres
+  ws-client:
+    depends_on:
+      - teslo-shop
   teslo-shop-postgres:
     image: postgres:14.3
     secrets:
@@ -27,8 +21,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD_FILE: /run/secrets/teslo_shop_postgres_password
       POSTGRES_DB: nestjs-teslo-shop
-    volumes:
-      - ./teslo-shop/postgres/prod:/var/lib/postgresql/data
 
 secrets:
   teslo_shop_postgres_url:

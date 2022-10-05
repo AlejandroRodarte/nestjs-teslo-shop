@@ -1,0 +1,21 @@
+version: '3.4'
+
+x-common-env-variables: &common-env-variables
+  NODE_ENV: production-docker
+
+services:
+  teslo-shop:
+    image: rodarte/nestjs-fr-teslo-shop-prod:3a19300
+    ports:
+      - '3000:3000'
+    environment:
+      <<: *common-env-variables
+      PORT: 3000
+      HOST_API: http://localhost:3000/api
+  ws-client:
+    image: rodarte/nestjs-fr-teslo-ws-client-prod:latest
+    ports:
+      - '3001:80'
+  teslo-shop-postgres:
+    volumes:
+      - ./teslo-shop/postgres/prod:/var/lib/postgresql/data

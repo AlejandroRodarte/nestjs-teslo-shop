@@ -5,12 +5,25 @@ x-common-env-variables: &common-env-variables
 
 services:
   teslo-shop:
-    image: rodarte/nestjs-fr-teslo-shop-dev:5bce020
+    image: rodarte/nestjs-fr-teslo-shop-dev:cbd5f4b
+    ports:
+      - '3000:3000'
+    environment:
+      <<: *common-env-variables
+      PORT: 3000
+      HOST_API: http://localhost:3000/api
     volumes:
       - ./teslo-shop:/node/app
       - /node/app/node_modules
+  ws-client:
+    image: rodarte/nestjs-fr-teslo-ws-client-dev:latest
+    ports:
+      - '3001:3001'
     environment:
       <<: *common-env-variables
+    volumes:
+      - ./ws-client:/node/app
+      - /node/app/node_modules
   teslo-shop-postgres:
     ports:
       - '5432:5432'
