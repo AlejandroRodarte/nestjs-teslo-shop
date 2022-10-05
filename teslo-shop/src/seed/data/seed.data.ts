@@ -7,14 +7,14 @@ import { SeedData } from '../interfaces/seed-data.interface';
 export const SEED_DATA: SeedData = {
   users: [
     {
-      email: 'test1@google.com',
-      fullName: 'Test 1',
+      email: 'alejandro@google.com',
+      fullName: 'Alejandro Rodarte',
       password: 'Wakala69.',
       roles: [UserRole.USER, UserRole.ADMIN],
     },
     {
-      email: 'test2@google.com',
-      fullName: 'Test 2',
+      email: 'melissa@google.com',
+      fullName: 'Melissa Perez',
       password: 'Wakala69.',
       roles: [UserRole.USER, UserRole.SUPERUSER],
     },
