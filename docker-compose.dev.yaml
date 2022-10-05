@@ -5,7 +5,7 @@ x-common-env-variables: &common-env-variables
 
 services:
   teslo-shop:
-    image: rodarte/nestjs-fr-teslo-shop-dev:cbd5f4b
+    image: rodarte/nestjs-fr-teslo-shop-dev:d4c9cc9
     ports:
       - '3000:3000'
     environment:
@@ -16,11 +16,12 @@ services:
       - ./teslo-shop:/node/app
       - /node/app/node_modules
   ws-client:
-    image: rodarte/nestjs-fr-teslo-ws-client-dev:latest
+    image: rodarte/nestjs-fr-teslo-ws-client-dev:148cd60
     ports:
       - '3001:3001'
     environment:
       <<: *common-env-variables
+      VITE_APP_SERVER_API: http://localhost:3000
     volumes:
       - ./ws-client:/node/app
       - /node/app/node_modules
