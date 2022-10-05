@@ -1,5 +1,6 @@
-import { Controller, Get, HttpStatus } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiHealthzResponses } from './decorators/swagger';
 import { HealthzResponseDto } from './dto/responses/healthz-response-dto';
 import { HealthService } from './health.service';
 
@@ -9,15 +10,7 @@ export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   @Get('healthz')
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Application is healthy',
-    type: HealthzResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Internal server error. Application is unhealthy',
-  })
+  @ApiHealthzResponses()
   healthz(): HealthzResponseDto {
     return this.healthService.healthz();
   }
