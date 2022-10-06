@@ -13,9 +13,11 @@ services:
       PORT: 3000
       HOST_API: http://localhost:3000/api
   ws-client:
-    image: rodarte/nestjs-fr-teslo-ws-client-prod:148cd60
+    image: rodarte/nestjs-fr-teslo-ws-client-prod:0.0.1
     ports:
       - '3001:80'
+    environment:
+      VITE_APP_SERVER_API: http://localhost:3000
   teslo-shop-postgres:
     volumes:
       - ./teslo-shop/postgres/prod:/var/lib/postgresql/data

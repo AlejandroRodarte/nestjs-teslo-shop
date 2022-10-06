@@ -58,7 +58,11 @@ LABEL com.rodarte.nestjs.fr.teslo.ws.client.stage build
 
 COPY --chown=node:node . .
 
-RUN tsc && vite build
+RUN rm -f /node/.env.production \
+    && touch /node/.env.production \
+    && echo "VITE_APP_SERVER_API=APP_VITE_APP_SERVER_API_VALUE" >> /node/.env.production \
+    && tsc \
+    && vite build
 
 
 FROM nginx:1.23 as prod
@@ -70,5 +74,11 @@ LABEL org.opencontainers.image.title "Production image for a client websocket fr
 LABEL com.rodarte.nestjs.fr.teslo.ws.client.stage prod
 
 COPY --from=build /node/dist /usr/share/nginx/html
+COPY --from=build /node/docker/entrypoint.sh /entrypoint.sh
 
 EXPOSE 80
+
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
+
+CMD [ "nginx", "-g", "daemon off;" ]

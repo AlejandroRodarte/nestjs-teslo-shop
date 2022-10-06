@@ -6,4 +6,5 @@ export const connectToServer = () => {
   const manager = new Manager(endpoint);
 
   const socket = manager.socket('/');
+  socket
 };
