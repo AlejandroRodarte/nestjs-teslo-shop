@@ -1,8 +1,8 @@
 import * as ServerToClientEventNames from '../constants/server-to-client-event-names.constants';
-import { ClientListUpdatedEventData } from './data/server-to-client/client-list-updated-event-data.interface';
+import { ClientListUpdatedEventDto } from '../dto/server-to-client/client-list-updated.dto';
 
 export interface ServerToClientEvents {
   [ServerToClientEventNames.CLIENT_LIST_UPDATED]: (
-    data: ClientListUpdatedEventData
+    data: ClientListUpdatedEventDto
   ) => void;
 }
