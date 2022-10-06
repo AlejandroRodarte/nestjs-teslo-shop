@@ -2,27 +2,35 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { MessagesWsService } from './messages-ws.service';
+import { AppWsServer } from 'src/types/app-ws-server.type';
+import { AppClientSocket } from 'src/types/app-client-socket.type';
+import * as ServerToClientEventNames from './constants/server-to-client-event-names.constants';
 
 @WebSocketGateway({ cors: true })
 export class MessagesWsGateway
-  implements OnGatewayConnection<Socket>, OnGatewayDisconnect<Socket>
+  implements
+    OnGatewayConnection<AppClientSocket>,
+    OnGatewayDisconnect<AppClientSocket>
 {
+  @WebSocketServer()
+  private readonly wss: AppWsServer;
+
   constructor(private readonly messagesWsService: MessagesWsService) {}
 
-  handleConnection(
-    client: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-    ...args: any[]
-  ) {
+  handleConnection(client: AppClientSocket, ...args: any[]) {
     this.messagesWsService.addClient(client);
+    this.wss.emit(ServerToClientEventNames.CLIENT_LIST_UPDATED, {
+      clientIds: this.messagesWsService.getConnectedClientIds(),
+    });
   }
 
-  handleDisconnect(
-    client: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-  ) {
+  handleDisconnect(client: AppClientSocket) {
     this.messagesWsService.removeClient(client.id);
+    this.wss.emit(ServerToClientEventNames.CLIENT_LIST_UPDATED, {
+      clientIds: this.messagesWsService.getConnectedClientIds(),
+    });
   }
 }
