@@ -18,17 +18,11 @@ export class MessagesWsGateway
     ...args: any[]
   ) {
     this.messagesWsService.addClient(client);
-    console.log(
-      `${this.messagesWsService.getAmountOfConnectedClients()} clients connected`,
-    );
   }
 
   handleDisconnect(
     client: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
     this.messagesWsService.removeClient(client.id);
-    console.log(
-      `${this.messagesWsService.getAmountOfConnectedClients()} clients connected`,
-    );
   }
 }
