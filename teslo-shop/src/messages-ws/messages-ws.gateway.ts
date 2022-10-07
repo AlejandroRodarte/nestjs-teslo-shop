@@ -26,6 +26,8 @@ export class MessagesWsGateway
   constructor(private readonly messagesWsService: MessagesWsService) {}
 
   handleConnection(client: AppClientSocket, ...args: any[]) {
+    const jwtToken = client.handshake.headers.authorization;
+    console.log(jwtToken);
     this.messagesWsService.addClient(client);
     this.wss.emit(
       ServerToClientEventNames.CLIENT_LIST_UPDATED,

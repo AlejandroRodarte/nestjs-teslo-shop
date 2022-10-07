@@ -44,11 +44,17 @@ const addListeners = (socket: ClientSocket) => {
   });
 };
 
-export const connectToServer = () => {
+export const connectToServer = (jwtToken: string) => {
   const endpoint = `${environment.serverApi}/socket.io/socket.io.js`;
   const manager = new Manager<ServerToClientEvents, ClientToServerEvents>(
-    endpoint
+    endpoint,
+    {
+      extraHeaders: {
+        authorization: jwtToken,
+      },
+    }
   );
+
   const socket: ClientSocket = manager.socket('/');
   addListeners(socket);
 };
