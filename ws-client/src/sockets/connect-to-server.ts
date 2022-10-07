@@ -25,7 +25,7 @@ const addListeners = (socket: ClientSocket) => {
     serverStatusSpan.innerHTML = 'Online';
   });
   socket.on('disconnect', () => {
-    serverStatusSpan.innerHTML = 'Offline';
+    serverStatusSpan.innerHTML = 'Disconnected';
   });
 
   new ClientListUpdatedListener(socket, { clientsUl }).subscribe();
