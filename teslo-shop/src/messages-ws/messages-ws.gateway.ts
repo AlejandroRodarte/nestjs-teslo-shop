@@ -1,5 +1,4 @@
 import {
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
@@ -13,6 +12,7 @@ import * as ServerToClientEventNames from './constants/server-to-client-event-na
 import * as ClientToServerEventNames from './constants/client-to-server-event-names.constants';
 import { ClientListUpdatedDto } from './dto/server-to-client/client-list-updated.dto';
 import { ClientMessageSentDto } from './dto/client-to-server/client-message-sent.dto';
+import { ServerMessageSentDto } from './dto/server-to-client/server-message-sent.dto';
 
 @WebSocketGateway({ cors: true })
 export class MessagesWsGateway
@@ -44,8 +44,11 @@ export class MessagesWsGateway
   @SubscribeMessage(ClientToServerEventNames.CLIENT_MESSAGE_SENT)
   onClientMessageSent(
     client: AppClientSocket,
-    @MessageBody() data: ClientMessageSentDto,
+    data: ClientMessageSentDto,
   ): void {
-    console.log(data);
+    this.wss.emit(
+      ServerToClientEventNames.SERVER_MESSAGE_SENT,
+      new ServerMessageSentDto('John Doe', data.message),
+    );
   }
 }

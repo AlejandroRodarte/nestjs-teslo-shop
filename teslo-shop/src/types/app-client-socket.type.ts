@@ -5,8 +5,8 @@ import { ServerToClientEvents } from 'src/messages-ws/interfaces/server-to-clien
 import { SocketData } from 'src/messages-ws/interfaces/socket-data.interface';
 
 export type AppClientSocket = Socket<
-  ServerToClientEvents,
   ClientToServerEvents,
+  ServerToClientEvents,
   InterServerEvents,
   SocketData
 >;

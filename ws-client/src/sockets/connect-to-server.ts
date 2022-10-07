@@ -3,9 +3,12 @@ import { environment } from '../environment';
 import { ClientSocket } from '../types/client-socket.type';
 import { ServerToClientEvents } from '../interfaces/server-to-client-events.interface';
 import { ClientToServerEvents } from '../interfaces/client-to-server-events.interface';
-import * as ServerToClientEventNames from '../constants/server-to-client-event-names.constants';
 import * as ClientToServerEventNames from '../constants/client-to-server-event-names.constants';
 import { ClientMessageSentDto } from '../dto/client-to-server/client-message-sent.dto';
+import {
+  ClientListUpdatedListener,
+  ServerMessageSentListener,
+} from '../classes';
 
 const addListeners = (socket: ClientSocket) => {
   const serverStatusSpan = <HTMLSpanElement>(
@@ -16,6 +19,7 @@ const addListeners = (socket: ClientSocket) => {
   const messageInput = <HTMLInputElement>(
     document.getElementById('message-input')!
   );
+  const messagesUl = <HTMLUListElement>document.getElementById('messages-ul')!;
 
   socket.on('connect', () => {
     serverStatusSpan.innerHTML = 'Online';
@@ -23,15 +27,9 @@ const addListeners = (socket: ClientSocket) => {
   socket.on('disconnect', () => {
     serverStatusSpan.innerHTML = 'Offline';
   });
-  socket.on(ServerToClientEventNames.CLIENT_LIST_UPDATED, (data) => {
-    let clientsHtml = '';
-    data.clientIds.forEach((clientId) => {
-      clientsHtml += `
-        <li>${clientId}</li>
-      `;
-    });
-    clientsUl.innerHTML = clientsHtml;
-  });
+
+  new ClientListUpdatedListener(socket, { clientsUl }).subscribe();
+  new ServerMessageSentListener(socket, { messagesUl }).subscribe();
 
   messageForm.addEventListener('submit', (event) => {
     event.preventDefault();
