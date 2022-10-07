@@ -15,7 +15,6 @@ import { ClientMessageSentDto } from './dto/client-to-server/client-message-sent
 import { ServerMessageSentDto } from './dto/server-to-client/server-message-sent.dto';
 import { JwtService } from '@nestjs/jwt';
 import { asyncWrapper } from '../common/helpers/wrappers/async-wrapper.wrapper';
-import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @WebSocketGateway({ cors: true })
 export class MessagesWsGateway
@@ -34,19 +33,18 @@ export class MessagesWsGateway
   async handleConnection(client: AppClientSocket, ...args: any[]) {
     const jwtToken = client.handshake.headers.authorization;
 
-    const verify = async () => {
-      const payload = await this.jwtService.verifyAsync(jwtToken);
-      return payload as JwtPayload;
+    const addClient = async () => {
+      const jwtPayload = await this.jwtService.verifyAsync(jwtToken);
+      await this.messagesWsService.addClient(client, jwtPayload.id);
     };
 
     const disconnect = async () => {
       client.disconnect();
     };
 
-    const [jwtPayload, error] = await asyncWrapper(verify, disconnect);
+    const [, error] = await asyncWrapper(addClient, disconnect);
     if (error) return;
 
-    this.messagesWsService.addClient(client);
     this.wss.emit(
       ServerToClientEventNames.CLIENT_LIST_UPDATED,
       new ClientListUpdatedDto(this.messagesWsService.getConnectedClientIds()),
@@ -66,9 +64,11 @@ export class MessagesWsGateway
     client: AppClientSocket,
     data: ClientMessageSentDto,
   ): void {
+    const user = this.messagesWsService.getUserByClientId(client.id);
+
     this.wss.emit(
       ServerToClientEventNames.SERVER_MESSAGE_SENT,
-      new ServerMessageSentDto('John Doe', data.message),
+      new ServerMessageSentDto(user.fullName, data.message),
     );
   }
 }

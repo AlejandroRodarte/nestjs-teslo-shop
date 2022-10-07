@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpUserDto, SignInUserDto } from './dto/requests';
 import { User } from './entities/user.entity';
@@ -17,6 +17,7 @@ import { PublicUserInformationResponseDto } from './dto/responses/objects/user/p
 import { SignInResponseDto } from './dto/responses/sign-in-response.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { GetNewTokenResponseDto } from './dto/responses/get-new-token-response.dto';
+import { uuidRegex } from '../common/regex/uuid.regex';
 
 @Injectable()
 export class AuthService extends RepositoryService<{ user: User }> {
@@ -38,17 +39,7 @@ export class AuthService extends RepositoryService<{ user: User }> {
   }
 
   async signIn(signInUserDto: SignInUserDto): Promise<SignInResponseDto> {
-    const [foundUser, findOneError] = await asyncWrapper(async () => {
-      const foundUser = await this.userRepository.findOne({
-        where: { email: signInUserDto.email },
-      });
-      return foundUser;
-    });
-    if (findOneError) this._handleError(findOneError);
-    if (!foundUser)
-      throw new UnauthorizedException(
-        'Authenthication failed. Please revise your credentials',
-      );
+    const foundUser = await this.findOneUserEntity(signInUserDto.email);
 
     const [isPasswordCorrect, hasherError] = await asyncWrapper(async () => {
       const result = await this.passwordHasher.compare(
@@ -73,6 +64,30 @@ export class AuthService extends RepositoryService<{ user: User }> {
   getNewToken(userId: string): GetNewTokenResponseDto {
     const newToken = this._generateToken({ id: userId });
     return new GetNewTokenResponseDto(newToken);
+  }
+
+  async findOneUserEntity(index: string): Promise<User> {
+    const where: FindOptionsWhere<User> = {};
+
+    if (uuidRegex.test(index)) where.id = index;
+    else where.email = index;
+
+    const [foundUser, findOneError] = await asyncWrapper(async () => {
+      const foundUser = await this.userRepository.findOne({ where });
+      return foundUser;
+    });
+
+    if (findOneError) this._handleError(findOneError);
+    if (!foundUser)
+      throw new UnauthorizedException(
+        'Authenthication failed. Please revise your credentials',
+      );
+    if (!foundUser.isActive)
+      throw new UnauthorizedException(
+        'Authenthication failed. You have been banned from the application',
+      );
+
+    return foundUser;
   }
 
   async saveNewUserEntity(signUpUserDto: SignUpUserDto): Promise<User> {
