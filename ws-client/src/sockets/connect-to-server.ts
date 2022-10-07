@@ -10,7 +10,11 @@ import {
   ServerMessageSentListener,
 } from '../classes';
 
-const addListeners = (socket: ClientSocket) => {
+let socket: ClientSocket;
+let clientListUpdatedListener: ClientListUpdatedListener | null;
+let serverMessageSentListener: ServerMessageSentListener | null;
+
+const addListeners = () => {
   const serverStatusSpan = <HTMLSpanElement>(
     document.getElementById('server-status')!
   );
@@ -28,10 +32,20 @@ const addListeners = (socket: ClientSocket) => {
     serverStatusSpan.innerHTML = 'Disconnected';
   });
 
-  new ClientListUpdatedListener(socket, { clientsUl }).subscribe();
-  new ServerMessageSentListener(socket, { messagesUl }).subscribe();
+  clientListUpdatedListener = new ClientListUpdatedListener(socket, {
+    clientsUl,
+  });
+  serverMessageSentListener = new ServerMessageSentListener(socket, {
+    messagesUl,
+  });
 
-  messageForm.addEventListener('submit', (event) => {
+  clientListUpdatedListener.subscribe();
+  serverMessageSentListener.subscribe();
+
+  const messageFormSubmitHandler: (
+    this: HTMLFormElement,
+    ev: SubmitEvent
+  ) => any = (event) => {
     event.preventDefault();
     if (messageInput.value.trim().length <= 0) return;
 
@@ -41,7 +55,10 @@ const addListeners = (socket: ClientSocket) => {
     );
 
     messageInput.value = '';
-  });
+  };
+
+  messageForm.removeEventListener('submit', messageFormSubmitHandler);
+  messageForm.addEventListener('submit', messageFormSubmitHandler);
 };
 
 export const connectToServer = (jwtToken: string) => {
@@ -55,6 +72,12 @@ export const connectToServer = (jwtToken: string) => {
     }
   );
 
-  const socket: ClientSocket = manager.socket('/');
-  addListeners(socket);
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    clientListUpdatedListener = null;
+    serverMessageSentListener = null;
+  }
+  socket = manager.socket('/');
+  addListeners();
 };
