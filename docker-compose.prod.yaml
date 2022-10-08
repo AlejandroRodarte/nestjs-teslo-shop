@@ -5,7 +5,7 @@ x-common-env-variables: &common-env-variables
 
 services:
   teslo-shop:
-    image: rodarte/nestjs-fr-teslo-shop-prod:d4c9cc9
+    image: rodarte/nestjs-fr-teslo-shop-prod:ee52052
     ports:
       - '3000:3000'
     environment:
@@ -13,7 +13,7 @@ services:
       PORT: 3000
       HOST_API: http://localhost:3000/api
   ws-client:
-    image: rodarte/nestjs-fr-teslo-ws-client-prod:dfbfdf0
+    image: rodarte/nestjs-fr-teslo-ws-client-prod:ee52052
     ports:
       - '3001:80'
     environment:
