@@ -93,7 +93,7 @@ jobs:
         id: devbuilder
 
       - name: Build against prodbuilder
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./ws-client
           push: true
@@ -108,7 +108,7 @@ jobs:
             rodarte/nestjs-fr-teslo-ws-client-prod:latest
 
       - name: Build against devbuilder
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         if: needs.paths-filter.outputs.dependency-files == 'true'
         with:
           context: ./ws-client
